@@ -42,9 +42,9 @@ public class AdminController {
     List<AdminLinkResponse> links(
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) Boolean expired,
-            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String login,
             HttpServletRequest request) {
-        return adminService.links(active, expired, username, request);
+        return adminService.links(active, expired, login, request);
     }
 
     @GetMapping("/users/{userId}/links")

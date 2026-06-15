@@ -33,11 +33,11 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
             select link from ShortLink link
             join link.user owner
             where (:active is null or link.active = :active)
-              and (:username is null or owner.username = :username)
+              and (:login is null or owner.login = :login)
               and (:expired is null or
                 (:expired = true and link.expiresAt <= :now) or
                 (:expired = false and link.expiresAt > :now))
             order by link.createdAt desc
             """)
-    List<ShortLink> search(Boolean active, Boolean expired, String username, Instant now);
+    List<ShortLink> search(Boolean active, Boolean expired, String login, Instant now);
 }

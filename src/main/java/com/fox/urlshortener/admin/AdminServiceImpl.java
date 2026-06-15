@@ -54,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
                 .sum();
         return new AdminUserDetailsResponse(
                 user.getId(),
-                user.getUsername(),
+                user.getLogin(),
                 user.getRole(),
                 user.isEnabled(),
                 user.getCreatedAt(),
@@ -69,9 +69,9 @@ public class AdminServiceImpl implements AdminService {
     public List<AdminLinkResponse> links(
             Boolean active,
             Boolean expired,
-            String username,
+            String login,
             HttpServletRequest request) {
-        return responses(shortLinkRepository.search(active, expired, username, Instant.now(clock)),
+        return responses(shortLinkRepository.search(active, expired, login, Instant.now(clock)),
                 request);
     }
 
@@ -123,7 +123,7 @@ public class AdminServiceImpl implements AdminService {
     private AdminUserResponse toUserResponse(User user) {
         return new AdminUserResponse(
                 user.getId(),
-                user.getUsername(),
+                user.getLogin(),
                 user.getRole(),
                 user.isEnabled(),
                 user.getCreatedAt(),
@@ -149,7 +149,7 @@ public class AdminServiceImpl implements AdminService {
                 link.getUpdatedAt(),
                 link.getExpiresAt(),
                 link.getUser().getId(),
-                link.getUser().getUsername());
+                link.getUser().getLogin());
     }
 
     private User findUser(Long userId) {

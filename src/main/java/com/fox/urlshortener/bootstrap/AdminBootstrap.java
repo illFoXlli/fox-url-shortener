@@ -34,16 +34,16 @@ public class AdminBootstrap implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        String username = appProperties.admin().username();
+        String login = appProperties.admin().login();
         String password = appProperties.admin().password();
-        if (username == null || username.isBlank() || password == null || password.isBlank()) {
-            throw new IllegalStateException("ADMIN_USERNAME and ADMIN_PASSWORD must be set");
+        if (login == null || login.isBlank() || password == null || password.isBlank()) {
+            throw new IllegalStateException("ADMIN_LOGIN and ADMIN_PASSWORD must be set");
         }
-        if (userRepository.existsByUsername(username)) {
-            LOGGER.info("Admin user '{}' already exists", username);
+        if (userRepository.existsByLogin(login)) {
+            LOGGER.info("Admin user '{}' already exists", login);
             return;
         }
-        userRepository.save(new User(username, passwordEncoder.encode(password), UserRole.ADMIN));
-        LOGGER.info("Created default admin user '{}'", username);
+        userRepository.save(new User(login, passwordEncoder.encode(password), UserRole.ADMIN));
+        LOGGER.info("Created default admin user '{}'", login);
     }
 }

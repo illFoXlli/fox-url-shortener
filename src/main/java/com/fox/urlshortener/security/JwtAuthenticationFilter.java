@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.fox.urlshortener.auth.JwtTokenService;
 import com.fox.urlshortener.auth.User;
 import com.fox.urlshortener.auth.UserRepository;
+import com.fox.urlshortener.config.AppProperties;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,10 +23,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
+    private final AppProperties appProperties;
 
-    public JwtAuthenticationFilter(JwtTokenService jwtTokenService, UserRepository userRepository) {
+    public JwtAuthenticationFilter(
+            JwtTokenService jwtTokenService,
+            UserRepository userRepository,
+            AppProperties appProperties) {
         this.jwtTokenService = jwtTokenService;
         this.userRepository = userRepository;
+        this.appProperties = appProperties;
     }
 
     @Override
@@ -33,16 +39,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer ")) {
+        String token = token(request);
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = header.substring(7);
         try {
-            String username = jwtTokenService.username(token);
+            String login = jwtTokenService.login(token);
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
-                userRepository.findByUsername(username)
+                userRepository.findByLogin(login)
                         .filter(user -> jwtTokenService.valid(token, user))
                         .ifPresent(user -> authenticate(request, user));
             }
@@ -50,6 +55,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
+    }
+
+    private String token(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if (appProperties.cookie().accessTokenName().equals(cookie.getName())
+                        && cookie.getValue() != null
+                        && !cookie.getValue().isBlank()) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        return null;
     }
 
     private void authenticate(HttpServletRequest request, User user) {

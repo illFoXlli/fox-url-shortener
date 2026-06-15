@@ -46,7 +46,7 @@ class AuthServiceImplTest {
     private AuthServiceImpl service;
 
     @Test
-    void registerCreatesUserAndReturnsTokens() {
+    void registerCreatesUserAndReturnsSession() {
         User saved = TestFixtures.user(1L, "fox", UserRole.USER);
         when(passwordEncoder.encode("Password123")).thenReturn("hash");
         when(userRepository.save(any(User.class))).thenReturn(saved);
@@ -54,7 +54,7 @@ class AuthServiceImplTest {
         when(jwtTokenService.accessTokenSeconds()).thenReturn(900L);
         when(refreshTokenService.create(saved, servletRequest)).thenReturn("refresh");
 
-        AuthResponse response = service.register(new RegisterRequest("fox", "Password123"),
+        AuthSession response = service.register(new RegisterRequest("fox", "Password123"),
                 servletRequest);
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -62,25 +62,26 @@ class AuthServiceImplTest {
         assertThat(captor.getValue().getRole()).isEqualTo(UserRole.USER);
         assertThat(response.accessToken()).isEqualTo("access");
         assertThat(response.refreshToken()).isEqualTo("refresh");
+        assertThat(response.user().login()).isEqualTo("fox");
     }
 
     @Test
-    void registerRejectsDuplicateUsername() {
-        when(userRepository.existsByUsername("fox")).thenReturn(true);
+    void registerRejectsDuplicateLogin() {
+        when(userRepository.existsByLogin("fox")).thenReturn(true);
 
         assertThatThrownBy(() -> service.register(new RegisterRequest("fox", "Password123"), servletRequest))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
-    void loginAuthenticatesAndReturnsTokens() {
+    void loginAuthenticatesAndReturnsSession() {
         User user = TestFixtures.user(1L, "fox", UserRole.USER);
-        when(userRepository.findByUsername("fox")).thenReturn(java.util.Optional.of(user));
+        when(userRepository.findByLogin("fox")).thenReturn(java.util.Optional.of(user));
         when(jwtTokenService.generateAccessToken(user)).thenReturn("access");
         when(jwtTokenService.accessTokenSeconds()).thenReturn(900L);
         when(refreshTokenService.create(user, servletRequest)).thenReturn("refresh");
 
-        AuthResponse response = service.login(new LoginRequest("fox", "Password123"),
+        AuthSession response = service.login(new LoginRequest("fox", "Password123"),
                 servletRequest);
 
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
@@ -95,8 +96,7 @@ class AuthServiceImplTest {
         when(jwtTokenService.accessTokenSeconds()).thenReturn(900L);
         when(refreshTokenService.create(user, servletRequest)).thenReturn("new-refresh");
 
-        AuthResponse response = service.refresh(new RefreshTokenRequest("old-refresh"),
-                servletRequest);
+        AuthSession response = service.refresh("old-refresh", servletRequest);
 
         assertThat(response.accessToken()).isEqualTo("new-access");
         assertThat(response.refreshToken()).isEqualTo("new-refresh");
@@ -104,7 +104,7 @@ class AuthServiceImplTest {
 
     @Test
     void logoutRevokesRefreshToken() {
-        service.logout(new RefreshTokenRequest("refresh"));
+        service.logout("refresh");
 
         verify(refreshTokenService).revoke("refresh");
     }

@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.servlet.http.Cookie;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.junit.jupiter.api.Test;
@@ -14,10 +16,10 @@ class RedirectEndpointIntegrationTest extends IntegrationTestBase {
 
     @Test
     void publicRedirectSendsUserToOriginalUrl() throws Exception {
-        String token = registerAndLogin("fox_redirect");
+        Cookie[] cookies = registerAndLogin("fox_redirect");
 
         String createdBody = mockMvc.perform(post("/api/v1/links")
-                .header("Authorization", "Bearer " + token)
+                .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"originalUrl":"https://example.com/redirect","expiresInDays":30}

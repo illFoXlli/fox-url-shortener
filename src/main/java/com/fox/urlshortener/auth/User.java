@@ -28,7 +28,7 @@ public class User implements UserDetails {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;
+    private String login;
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
@@ -49,8 +49,8 @@ public class User implements UserDetails {
     protected User() {
     }
 
-    public User(String username, String passwordHash, UserRole role) {
-        this.username = username;
+    public User(String login, String passwordHash, UserRole role) {
+        this.login = login;
         this.passwordHash = passwordHash;
         this.role = role;
         this.enabled = true;
@@ -74,7 +74,11 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return login;
+    }
+
+    public String getLogin() {
+        return login;
     }
 
     public String getPasswordHash() {

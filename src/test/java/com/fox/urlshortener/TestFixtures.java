@@ -20,6 +20,8 @@ public final class TestFixtures {
                 "http://localhost:3396",
                 new AppProperties.Admin("admin", "Password123", "FoX Admin"),
                 new AppProperties.Jwt("change_me_to_long_secret_change_me_to_long_secret", 15, 30),
+                new AppProperties.Cookie("fox_access_token", "fox_refresh_token", false, "Lax", ""),
+                new AppProperties.Cors("http://localhost:3395"),
                 new AppProperties.ShortLink(6, 8, 30),
                 new AppProperties.Forwarded(
                         "X-Forwarded-Proto",
@@ -27,8 +29,8 @@ public final class TestFixtures {
                         "X-Forwarded-Port"));
     }
 
-    public static User user(Long id, String username, UserRole role) {
-        User user = new User(username, "hash", role);
+    public static User user(Long id, String login, UserRole role) {
+        User user = new User(login, "hash", role);
         ReflectionTestUtils.setField(user, "id", id);
         ReflectionTestUtils.setField(user, "createdAt", Instant.parse("2026-06-12T10:00:00Z"));
         ReflectionTestUtils.setField(user, "updatedAt", Instant.parse("2026-06-12T10:00:00Z"));

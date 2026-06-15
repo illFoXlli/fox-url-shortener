@@ -15,7 +15,7 @@ public interface AdminService {
     List<AdminLinkResponse> links(
             Boolean active,
             Boolean expired,
-            String username,
+            String login,
             HttpServletRequest request);
 
     List<AdminLinkResponse> userLinks(Long userId, HttpServletRequest request);

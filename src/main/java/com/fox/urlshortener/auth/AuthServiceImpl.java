@@ -34,44 +34,49 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse register(RegisterRequest request, HttpServletRequest servletRequest) {
-        if (userRepository.existsByUsername(request.username())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already exists");
+    public AuthSession register(RegisterRequest request, HttpServletRequest servletRequest) {
+        if (userRepository.existsByLogin(request.login())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Login already exists");
         }
         User user = userRepository.save(new User(
-                request.username(),
+                request.login(),
                 passwordEncoder.encode(request.password()),
                 UserRole.USER));
         return response(user, servletRequest);
     }
 
     @Override
-    public AuthResponse login(LoginRequest request, HttpServletRequest servletRequest) {
+    public AuthSession login(LoginRequest request, HttpServletRequest servletRequest) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                request.username(),
+                request.login(),
                 request.password()));
-        User user = userRepository.findByUsername(request.username())
+        User user = userRepository.findByLogin(request.login())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
                         "Invalid credentials"));
         return response(user, servletRequest);
     }
 
     @Override
-    public AuthResponse refresh(RefreshTokenRequest request, HttpServletRequest servletRequest) {
-        User user = refreshTokenService.verify(request.refreshToken());
+    public AuthSession refresh(String refreshToken, HttpServletRequest servletRequest) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing refresh token");
+        }
+        User user = refreshTokenService.verify(refreshToken);
         return response(user, servletRequest);
     }
 
     @Override
-    public void logout(RefreshTokenRequest request) {
-        refreshTokenService.revoke(request.refreshToken());
+    public void logout(String refreshToken) {
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            refreshTokenService.revoke(refreshToken);
+        }
     }
 
-    private AuthResponse response(User user, HttpServletRequest request) {
-        return new AuthResponse(
+    private AuthSession response(User user, HttpServletRequest request) {
+        return new AuthSession(
                 jwtTokenService.generateAccessToken(user),
                 refreshTokenService.create(user, request),
-                "Bearer",
-                jwtTokenService.accessTokenSeconds());
+                jwtTokenService.accessTokenSeconds(),
+                CurrentUserResponse.from(user));
     }
 }

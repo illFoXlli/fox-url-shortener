@@ -13,5 +13,5 @@ public record AdminLinkResponse(
         Instant updatedAt,
         Instant expiresAt,
         Long userId,
-        String username) {
+        String userLogin) {
 }

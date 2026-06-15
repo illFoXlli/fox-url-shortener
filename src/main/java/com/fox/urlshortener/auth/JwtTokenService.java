@@ -32,7 +32,7 @@ public class JwtTokenService {
         Instant now = Instant.now(clock);
         Instant expiresAt = now.plus(appProperties.jwt().accessExpiration());
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getLogin())
                 .claim("role", user.getRole().name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiresAt))
@@ -40,12 +40,12 @@ public class JwtTokenService {
                 .compact();
     }
 
-    public String username(String token) {
+    public String login(String token) {
         return claims(token).getSubject();
     }
 
     public boolean valid(String token, User user) {
-        return user.getUsername().equals(username(token))
+        return user.getLogin().equals(login(token))
                 && claims(token).getExpiration().after(Date.from(Instant.now(clock)));
     }
 

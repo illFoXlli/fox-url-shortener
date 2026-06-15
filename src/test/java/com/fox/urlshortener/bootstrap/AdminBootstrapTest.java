@@ -29,7 +29,7 @@ class AdminBootstrapTest {
     void createsAdminWhenMissing() {
         AdminBootstrap bootstrap = new AdminBootstrap(userRepository, passwordEncoder,
                 TestFixtures.properties());
-        when(userRepository.existsByUsername("admin")).thenReturn(false);
+        when(userRepository.existsByLogin("admin")).thenReturn(false);
         when(passwordEncoder.encode("Password123")).thenReturn("hash");
 
         bootstrap.run(null);
@@ -41,7 +41,7 @@ class AdminBootstrapTest {
     void doesNothingWhenAdminExists() {
         AdminBootstrap bootstrap = new AdminBootstrap(userRepository, passwordEncoder,
                 TestFixtures.properties());
-        when(userRepository.existsByUsername("admin")).thenReturn(true);
+        when(userRepository.existsByLogin("admin")).thenReturn(true);
 
         bootstrap.run(null);
 
@@ -55,6 +55,8 @@ class AdminBootstrapTest {
                 "http://localhost:3396",
                 new AppProperties.Admin("", "", "FoX Admin"),
                 TestFixtures.properties().jwt(),
+                TestFixtures.properties().cookie(),
+                TestFixtures.properties().cors(),
                 TestFixtures.properties().shortLink(),
                 TestFixtures.properties().forwarded());
         AdminBootstrap bootstrap = new AdminBootstrap(userRepository, passwordEncoder, properties);

@@ -15,7 +15,7 @@ Docker, GitHub Actions, Checkstyle, Spotless, JaCoCo.
 ```bash
 cp .env.example .env
 ./gradlew clean build
-APP_PORT=3396 ADMIN_USERNAME=admin ADMIN_PASSWORD=change_me \
+APP_PORT=3396 ADMIN_LOGIN=admin ADMIN_PASSWORD=change_me \
 JWT_SECRET=change_me_to_long_secret_change_me_to_long_secret \
 ./gradlew bootRun
 ```
@@ -47,12 +47,17 @@ application database connection.
 `FOX_DB_ADMIN_USERNAME`, `FOX_DB_ADMIN_PASSWORD` are used only by
 `docker/db-init/init-db.sh` to connect to the shared PostgreSQL server.
 
-`ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_DISPLAY_NAME` configure the default
-administrator. The application fails on startup if username or password is
+`ADMIN_LOGIN`, `ADMIN_PASSWORD`, `ADMIN_DISPLAY_NAME` configure the default
+administrator. The application fails on startup if login or password is
 missing. Bootstrap is idempotent: existing admin users are not modified.
 
 `JWT_SECRET`, `JWT_ACCESS_EXPIRATION_MINUTES`, `JWT_REFRESH_EXPIRATION_DAYS`
 configure JWT and refresh-token lifetime.
+
+`COOKIE_ACCESS_TOKEN_NAME`, `COOKIE_REFRESH_TOKEN_NAME`, `COOKIE_SECURE`,
+`COOKIE_SAME_SITE`, `COOKIE_DOMAIN` configure HttpOnly auth cookies.
+`CORS_ALLOWED_ORIGINS` configures frontend origins that may call the API with
+credentials.
 
 `APP_PORT`, `APP_BASE_URL`, `FORWARDED_PROTO_HEADER`, `FORWARDED_HOST_HEADER`,
 `FORWARDED_PORT_HEADER` configure HTTP and short URL generation behind a reverse
@@ -81,23 +86,38 @@ Register:
 
 ```bash
 curl -X POST http://localhost:3396/api/v1/auth/register \
+  -c /tmp/fox-url-shortener.cookies \
   -H 'Content-Type: application/json' \
-  -d '{"username":"fox","password":"Password123"}'
+  -d '{"login":"fox","password":"Password123"}'
 ```
 
 Login:
 
 ```bash
 curl -X POST http://localhost:3396/api/v1/auth/login \
+  -c /tmp/fox-url-shortener.cookies \
   -H 'Content-Type: application/json' \
-  -d '{"username":"fox","password":"Password123"}'
+  -d '{"login":"fox","password":"Password123"}'
+```
+
+Current user:
+
+```bash
+curl -b /tmp/fox-url-shortener.cookies http://localhost:3396/api/v1/auth/me
+```
+
+Refresh session:
+
+```bash
+curl -X POST -b /tmp/fox-url-shortener.cookies -c /tmp/fox-url-shortener.cookies \
+  http://localhost:3396/api/v1/auth/refresh
 ```
 
 Create short link:
 
 ```bash
 curl -X POST http://localhost:3396/api/v1/links \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -b /tmp/fox-url-shortener.cookies \
   -H 'Content-Type: application/json' \
   -d '{"originalUrl":"https://example.com/some/very/long/url","expiresInDays":30}'
 ```
@@ -105,14 +125,14 @@ curl -X POST http://localhost:3396/api/v1/links \
 Get links:
 
 ```bash
-curl -H "Authorization: Bearer $ACCESS_TOKEN" http://localhost:3396/api/v1/links
+curl -b /tmp/fox-url-shortener.cookies http://localhost:3396/api/v1/links
 ```
 
 Disable link:
 
 ```bash
 curl -X PATCH http://localhost:3396/api/v1/links/1/status \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -b /tmp/fox-url-shortener.cookies \
   -H 'Content-Type: application/json' \
   -d '{"active":false}'
 ```
@@ -120,20 +140,20 @@ curl -X PATCH http://localhost:3396/api/v1/links/1/status \
 Hard delete link:
 
 ```bash
-curl -X DELETE -H "Authorization: Bearer $ACCESS_TOKEN" \
+curl -X DELETE -b /tmp/fox-url-shortener.cookies \
   http://localhost:3396/api/v1/links/1/hard
 ```
 
 Admin get users:
 
 ```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" http://localhost:3396/api/v1/admin/users
+curl -b /tmp/fox-url-shortener-admin.cookies http://localhost:3396/api/v1/admin/users
 ```
 
 Admin get user links:
 
 ```bash
-curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+curl -b /tmp/fox-url-shortener-admin.cookies \
   http://localhost:3396/api/v1/admin/users/1/links
 ```
 
@@ -141,7 +161,7 @@ Admin disable any link:
 
 ```bash
 curl -X PATCH http://localhost:3396/api/v1/admin/links/1/status \
-  -H "Authorization: Bearer $ADMIN_TOKEN" \
+  -b /tmp/fox-url-shortener-admin.cookies \
   -H 'Content-Type: application/json' \
   -d '{"active":false}'
 ```

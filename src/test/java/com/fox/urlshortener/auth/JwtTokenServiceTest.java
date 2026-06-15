@@ -19,7 +19,7 @@ class JwtTokenServiceTest {
 
         String token = service.generateAccessToken(user);
 
-        assertThat(service.username(token)).isEqualTo("fox");
+        assertThat(service.login(token)).isEqualTo("fox");
         assertThat(service.valid(token, user)).isTrue();
         assertThat(service.accessTokenSeconds()).isEqualTo(900);
     }

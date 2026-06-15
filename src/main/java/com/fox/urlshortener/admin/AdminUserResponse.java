@@ -6,7 +6,7 @@ import com.fox.urlshortener.auth.UserRole;
 
 public record AdminUserResponse(
         Long id,
-        String username,
+        String login,
         UserRole role,
         boolean enabled,
         Instant createdAt,
