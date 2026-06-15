@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: fox-url-shortener
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:fox_url_shortener}
+    username: ${DB_USERNAME:fox}
+    password: ${DB_PASSWORD:change_me}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${APP_PORT:3396}
+  forward-headers-strategy: framework
+
+app:
+  base-url: ${APP_BASE_URL:http://localhost:3396}
+  short-url-base-url: ${SHORT_URL_BASE_URL:http://localhost:3396}
+  admin:
+    username: ${ADMIN_USERNAME:}
+    password: ${ADMIN_PASSWORD:}
+    display-name: ${ADMIN_DISPLAY_NAME:FoX Admin}
+  jwt:
+    secret: ${JWT_SECRET:change_me_to_long_secret_change_me_to_long_secret}
+    access-expiration-minutes: ${JWT_ACCESS_EXPIRATION_MINUTES:15}
+    refresh-expiration-days: ${JWT_REFRESH_EXPIRATION_DAYS:30}
+  short-link:
+    code-min-length: 6
+    code-max-length: 8
+    default-expiration-days: 30
+  forwarded:
+    proto-header: ${FORWARDED_PROTO_HEADER:X-Forwarded-Proto}
+    host-header: ${FORWARDED_HOST_HEADER:X-Forwarded-Host}
+    port-header: ${FORWARDED_PORT_HEADER:X-Forwarded-Port}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
