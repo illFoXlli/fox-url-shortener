@@ -17,6 +17,10 @@ java {
     }
 }
 
+springBoot {
+    mainClass = 'com.fox.urlshortener.AppLauncher'
+}
+
 repositories {
     mavenCentral()
 }

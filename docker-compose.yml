@@ -3,6 +3,8 @@ services:
     image: postgres:17-alpine
     env_file:
       - .env
+    environment:
+      DB_HOST: host.docker.internal
     volumes:
       - ./docker/db-init:/docker-entrypoint-initdb.d:ro
     entrypoint: ["/bin/sh", "/docker-entrypoint-initdb.d/init-db.sh"]
@@ -11,6 +13,8 @@ services:
     build: .
     env_file:
       - .env
+    environment:
+      DB_HOST: host.docker.internal
     depends_on:
       backend-db-init:
         condition: service_completed_successfully

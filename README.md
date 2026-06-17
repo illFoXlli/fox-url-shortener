@@ -20,13 +20,36 @@ JWT_SECRET=change_me_to_long_secret_change_me_to_long_secret \
 ./gradlew bootRun
 ```
 
-IntelliJ IDEA can run `com.fox.urlshortener.AppLauncher` directly.
+## Run from IntelliJ IDEA
+
+The application entry point is
+`src/main/java/com/fox/urlshortener/AppLauncher.java`. It is located in the
+root package `com.fox.urlshortener` and can be started directly from IntelliJ
+IDEA.
+
+Before running:
+
+1. Install JDK 21 and import the project as a Gradle project.
+2. Create `.env` from `.env.example`.
+3. Make sure PostgreSQL is available and the values `DB_HOST`, `DB_PORT`,
+   `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` point to the application database.
+   For direct IntelliJ IDEA launch, use `DB_HOST=localhost`.
+4. Set required admin values: `ADMIN_LOGIN` and `ADMIN_PASSWORD`.
+5. Open `AppLauncher.java` and click Run next to the `main` method, or create an
+   IntelliJ Application run configuration with main class
+   `com.fox.urlshortener.AppLauncher`.
+
+Application: `http://localhost:3396`
+
+Swagger: `http://localhost:3396/swagger-ui/index.html`
 
 ## Docker
 
 The compose file expects the shared PostgreSQL server on
-`host.docker.internal:5432`. The `db-init` container creates the application role
-and database only when they are missing.
+`host.docker.internal:5432`. Docker Compose overrides `DB_HOST` inside the
+containers, so `.env` can keep `DB_HOST=localhost` for direct IntelliJ IDEA
+launch. The `db-init` container creates the application role and database only
+when they are missing.
 
 ```bash
 cp .env.example .env
