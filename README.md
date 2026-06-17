@@ -20,6 +20,36 @@ JWT_SECRET=change_me_to_long_secret_change_me_to_long_secret \
 ./gradlew bootRun
 ```
 
+## Start PostgreSQL with Docker
+
+If PostgreSQL is not installed locally, start it in Docker before running the
+application from IntelliJ IDEA or Gradle:
+
+```bash
+docker run --name fox-url-shortener-db \
+  -e POSTGRES_DB=fox_url_shortener \
+  -e POSTGRES_USER=fox \
+  -e POSTGRES_PASSWORD=change_me \
+  -p 5432:5432 \
+  -d postgres:17-alpine
+```
+
+The default `.env.example` database settings already match this container:
+`DB_HOST=localhost`, `DB_PORT=5432`, `DB_NAME=fox_url_shortener`,
+`DB_USERNAME=fox`, `DB_PASSWORD=change_me`.
+
+To stop the database:
+
+```bash
+docker stop fox-url-shortener-db
+```
+
+To start the same database again later:
+
+```bash
+docker start fox-url-shortener-db
+```
+
 ## Run from IntelliJ IDEA
 
 The application entry point is
