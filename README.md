@@ -59,9 +59,9 @@ configure JWT and refresh-token lifetime.
 `CORS_ALLOWED_ORIGINS` configures frontend origins that may call the API with
 credentials.
 
-`APP_PORT`, `APP_BASE_URL`, `FORWARDED_PROTO_HEADER`, `FORWARDED_HOST_HEADER`,
-`FORWARDED_PORT_HEADER` configure HTTP and short URL generation behind a reverse
-proxy.
+`APP_PORT` configures the backend port. `APP_BASE_URL` is the application base
+URL. `SHORT_URL_BASE_URL`, `FORWARDED_PROTO_HEADER`, `FORWARDED_HOST_HEADER`,
+`FORWARDED_PORT_HEADER` configure short URL generation behind a reverse proxy.
 
 ## Quality
 
