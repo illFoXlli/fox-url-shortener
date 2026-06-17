@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.fox.urlshortener.TestFixtures;
@@ -67,16 +69,17 @@ class AuthServiceImplTest {
 
     @Test
     void registerRejectsDuplicateLogin() {
+        RegisterRequest request = new RegisterRequest("fox", "Password123");
         when(userRepository.existsByLogin("fox")).thenReturn(true);
 
-        assertThatThrownBy(() -> service.register(new RegisterRequest("fox", "Password123"), servletRequest))
+        assertThatThrownBy(() -> service.register(request, servletRequest))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test
     void loginAuthenticatesAndReturnsSession() {
         User user = TestFixtures.user(1L, "fox", UserRole.USER);
-        when(userRepository.findByLogin("fox")).thenReturn(java.util.Optional.of(user));
+        when(userRepository.findByLogin("fox")).thenReturn(Optional.of(user));
         when(jwtTokenService.generateAccessToken(user)).thenReturn("access");
         when(jwtTokenService.accessTokenSeconds()).thenReturn(900L);
         when(refreshTokenService.create(user, servletRequest)).thenReturn("refresh");
