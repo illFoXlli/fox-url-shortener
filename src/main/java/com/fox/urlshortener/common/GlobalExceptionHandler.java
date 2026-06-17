@@ -1,5 +1,7 @@
 package com.fox.urlshortener.common;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -21,9 +23,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -42,7 +41,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<ApiError> validation(
+    ResponseEntity<Object> validation(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
         List<String> details = ex.getBindingResult()
@@ -55,7 +54,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    ResponseEntity<?> responseStatus(
+    ResponseEntity<Object> responseStatus(
             ResponseStatusException ex,
             HttpServletRequest request) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
@@ -70,31 +69,32 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    ResponseEntity<?> noResource(
+    ResponseEntity<Object> noResource(
             NoResourceFoundException ex,
             HttpServletRequest request) {
         if (isPublicPageRequest(request)) {
             return htmlError(HttpStatus.NOT_FOUND, notFoundPage);
         }
+
         return error(HttpStatus.NOT_FOUND, "Not found", request, List.of());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    ResponseEntity<ApiError> accessDenied(
+    ResponseEntity<Object> accessDenied(
             AccessDeniedException ex,
             HttpServletRequest request) {
         return error(HttpStatus.FORBIDDEN, "Access denied", request, List.of());
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    ResponseEntity<ApiError> authentication(
+    ResponseEntity<Object> authentication(
             AuthenticationException ex,
             HttpServletRequest request) {
         return error(HttpStatus.UNAUTHORIZED, "Invalid credentials", request, List.of());
     }
 
     @ExceptionHandler(Exception.class)
-    ResponseEntity<?> general(
+    ResponseEntity<Object> general(
             Exception ex,
             HttpServletRequest request) {
         log.error("Unexpected error on path {}", request.getRequestURI(), ex);
@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", request, List.of());
     }
 
-    private ResponseEntity<ApiError> error(
+    private ResponseEntity<Object> error(
             HttpStatus status,
             String message,
             HttpServletRequest request,
@@ -122,7 +122,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
-    private ResponseEntity<String> htmlError(HttpStatus status, ClassPathResource page) {
+    private ResponseEntity<Object> htmlError(HttpStatus status, ClassPathResource page) {
         return ResponseEntity.status(status)
                 .contentType(MediaType.TEXT_HTML)
                 .body(html(page));
