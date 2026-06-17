@@ -78,11 +78,11 @@ public class User implements UserDetails {
     }
 
     public String getLogin() {
-        return login;
+        return getUsername();
     }
 
     public String getPasswordHash() {
-        return passwordHash;
+        return getPassword();
     }
 
     public UserRole getRole() {
