@@ -10,12 +10,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,6 +25,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Testcontainers(disabledWithoutDocker = true)
 abstract class IntegrationTestBase {
 
@@ -46,11 +47,6 @@ abstract class IntegrationTestBase {
         registry.add("app.admin.password", () -> "Password123");
         registry.add("app.jwt.secret", () -> "change_me_to_long_secret_change_me_to_long_secret");
         registry.add("app.base-url", () -> "http://localhost:3396");
-    }
-
-    @BeforeEach
-    void ensureAdminLoginWorks() throws Exception {
-        login("admin", "Password123");
     }
 
     Cookie[] registerAndLogin(String login) throws Exception {
