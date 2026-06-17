@@ -72,8 +72,9 @@ class ShortLinkServiceImplTest {
         User owner = TestFixtures.user(1L, "owner", UserRole.USER);
         User other = TestFixtures.user(2L, "other", UserRole.USER);
         when(repository.findById(10L)).thenReturn(Optional.of(TestFixtures.link(10L, owner)));
+        ShortLinkServiceImpl service = service();
 
-        assertThatThrownBy(() -> service().get(10L, other, request))
+        assertThatThrownBy(() -> service.get(10L, other, request))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
@@ -157,8 +158,9 @@ class ShortLinkServiceImplTest {
         ShortLink link = TestFixtures.link(10L, user);
         link.setActive(false);
         when(repository.findByCode("aB12xZ")).thenReturn(Optional.of(link));
+        ShortLinkServiceImpl service = service();
 
-        assertThatThrownBy(() -> service().redirect("aB12xZ"))
+        assertThatThrownBy(() -> service.redirect("aB12xZ"))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
