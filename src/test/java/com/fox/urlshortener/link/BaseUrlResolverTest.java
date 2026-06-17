@@ -34,4 +34,14 @@ class BaseUrlResolverTest {
 
         assertThat(resolver.resolve(request)).isEqualTo("https://api.fox.kh.ua:8443");
     }
+
+    @Test
+    void usesRequestHostProtoAndPortWhenForwardedHeadersAreAlreadyApplied() {
+        when(request.getScheme()).thenReturn("https");
+        when(request.getServerName()).thenReturn("api.fox.kh.ua");
+        when(request.getServerPort()).thenReturn(8443);
+        BaseUrlResolver resolver = new BaseUrlResolver(TestFixtures.properties());
+
+        assertThat(resolver.resolve(request)).isEqualTo("https://api.fox.kh.ua:8443");
+    }
 }
