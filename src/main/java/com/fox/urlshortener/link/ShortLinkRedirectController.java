@@ -1,8 +1,11 @@
 package com.fox.urlshortener.link;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import org.springframework.core.io.ClassPathResource;
 
 @RestController
 public class ShortLinkRedirectController {
@@ -35,7 +33,7 @@ public class ShortLinkRedirectController {
     }
 
     @GetMapping("/{code:[a-zA-Z0-9]{6,8}}")
-    ResponseEntity<?> redirect(@PathVariable String code) throws IOException {
+    ResponseEntity<String> redirect(@PathVariable String code) throws IOException {
         try {
             ShortLink link = shortLinkService.redirect(code);
             return ResponseEntity.status(HttpStatus.FOUND)
@@ -45,6 +43,7 @@ public class ShortLinkRedirectController {
             if (ex.getStatusCode().value() != HttpStatus.NOT_FOUND.value()) {
                 throw ex;
             }
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.TEXT_HTML)
                     .body(notFoundHtml());

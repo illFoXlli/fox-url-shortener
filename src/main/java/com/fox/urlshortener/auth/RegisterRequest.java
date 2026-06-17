@@ -8,5 +8,5 @@ import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
         @NotBlank @Size(min = 3, max = 50) String login,
-        @NotBlank @Size(min = 8) @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$", message = ValidationMessages.PASSWORD_PATTERN) String password) {
+        @NotBlank @Size(min = 8) @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$", message = ValidationMessages.CREDENTIAL_RULE_MESSAGE) String password) {
 }
