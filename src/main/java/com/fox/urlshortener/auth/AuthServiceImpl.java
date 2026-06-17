@@ -57,6 +57,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthSession refresh(String refreshToken, HttpServletRequest servletRequest) {
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing refresh token");
