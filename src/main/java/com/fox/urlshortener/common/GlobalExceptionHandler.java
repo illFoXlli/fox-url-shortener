@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -83,6 +84,13 @@ public class GlobalExceptionHandler {
             AccessDeniedException ex,
             HttpServletRequest request) {
         return error(HttpStatus.FORBIDDEN, "Access denied", request, List.of());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    ResponseEntity<ApiError> authentication(
+            AuthenticationException ex,
+            HttpServletRequest request) {
+        return error(HttpStatus.UNAUTHORIZED, "Invalid credentials", request, List.of());
     }
 
     @ExceptionHandler(Exception.class)
