@@ -65,7 +65,7 @@ class RedirectEndpointIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "Ссылка недоступна")));
+                        "Link unavailable")));
     }
 
     @Test
@@ -74,6 +74,6 @@ class RedirectEndpointIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
-                        "Ссылка недоступна")));
+                        "Link unavailable")));
     }
 }
