@@ -76,7 +76,9 @@ class RefreshTokenServiceImplTest {
                 "127.0.0.1");
         when(repository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
 
-        assertThatThrownBy(() -> service().verify("raw"))
+        RefreshTokenServiceImpl refreshTokenService = service();
+
+        assertThatThrownBy(() -> refreshTokenService.verify("raw"))
                 .isInstanceOf(ResponseStatusException.class);
     }
 
