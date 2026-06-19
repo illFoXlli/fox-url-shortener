@@ -27,5 +27,5 @@ public interface ShortLinkService {
 
     void hardDelete(Long id, User user);
 
-    ShortLink redirect(String code);
+    String redirect(String code);
 }

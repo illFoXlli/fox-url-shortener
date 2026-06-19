@@ -10,6 +10,7 @@ import com.fox.urlshortener.auth.User;
 import com.fox.urlshortener.auth.UserRepository;
 import com.fox.urlshortener.link.BaseUrlResolver;
 import com.fox.urlshortener.link.ShortLink;
+import com.fox.urlshortener.link.ShortLinkRedirectCache;
 import com.fox.urlshortener.link.ShortLinkRepository;
 import com.fox.urlshortener.link.UpdateShortLinkStatusRequest;
 
@@ -24,16 +25,19 @@ public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final ShortLinkRepository shortLinkRepository;
+    private final ShortLinkRedirectCache redirectCache;
     private final BaseUrlResolver baseUrlResolver;
     private final Clock clock;
 
     public AdminServiceImpl(
             UserRepository userRepository,
             ShortLinkRepository shortLinkRepository,
+            ShortLinkRedirectCache redirectCache,
             BaseUrlResolver baseUrlResolver,
             Clock clock) {
         this.userRepository = userRepository;
         this.shortLinkRepository = shortLinkRepository;
+        this.redirectCache = redirectCache;
         this.baseUrlResolver = baseUrlResolver;
         this.clock = clock;
     }
@@ -105,6 +109,7 @@ public class AdminServiceImpl implements AdminService {
             UpdateShortLinkStatusRequest requestBody,
             HttpServletRequest request) {
         ShortLink link = findLink(linkId);
+        flushAndEvictRedirectCache(link.getCode());
         link.setActive(requestBody.active());
         return toLinkResponse(link, request);
     }
@@ -112,13 +117,17 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional
     public void softDelete(Long linkId) {
-        findLink(linkId).setActive(false);
+        ShortLink link = findLink(linkId);
+        flushAndEvictRedirectCache(link.getCode());
+        link.setActive(false);
     }
 
     @Override
     @Transactional
     public void hardDelete(Long linkId) {
-        shortLinkRepository.delete(findLink(linkId));
+        ShortLink link = findLink(linkId);
+        flushAndEvictRedirectCache(link.getCode());
+        shortLinkRepository.delete(link);
     }
 
     private AdminUserResponse toUserResponse(User user) {
@@ -163,5 +172,13 @@ public class AdminServiceImpl implements AdminService {
         return shortLinkRepository.findById(linkId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Short link not found"));
+    }
+
+    private void flushAndEvictRedirectCache(String code) {
+        long clicks = redirectCache.drainClickCount(code);
+        if (clicks > 0) {
+            shortLinkRepository.addClickCount(code, clicks, Instant.now(clock));
+        }
+        redirectCache.evict(code);
     }
 }

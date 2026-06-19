@@ -15,6 +15,7 @@ public record AppProperties(
         Cookie cookie,
         Cors cors,
         ShortLink shortLink,
+        RedirectCache redirectCache,
         Forwarded forwarded) {
 
     public record Admin(String login, String password, String displayName) {
@@ -31,11 +32,18 @@ public record AppProperties(
         }
     }
 
-    public record ShortLink(
-            int codeMinLength,
-            int codeMaxLength,
-            int defaultExpirationDays,
-            long redirectCacheMaxAgeSeconds) {
+    public record ShortLink(int codeMinLength, int codeMaxLength, int defaultExpirationDays) {
+    }
+
+    public record RedirectCache(
+            boolean enabled,
+            String keyPrefix,
+            long ttlSeconds,
+            long clickFlushIntervalMillis) {
+
+        public Duration ttl() {
+            return Duration.ofSeconds(ttlSeconds);
+        }
     }
 
     public record Cookie(

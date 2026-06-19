@@ -1,6 +1,15 @@
 spring:
   application:
     name: fox-url-shortener-test
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      username: ""
+      password: ""
+      timeout: 100ms
+      ssl:
+        enabled: false
   jpa:
     hibernate:
       ddl-auto: validate
@@ -37,7 +46,11 @@ app:
     code-min-length: 6
     code-max-length: 8
     default-expiration-days: 30
-    redirect-cache-max-age-seconds: 3600
+  redirect-cache:
+    enabled: false
+    key-prefix: test:short-link:redirect:
+    ttl-seconds: 60
+    click-flush-interval-millis: 60000
   forwarded:
     proto-header: X-Forwarded-Proto
     host-header: X-Forwarded-Host

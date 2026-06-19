@@ -12,6 +12,8 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       PROD_DB_HOST: "${PROD_DB_DOCKER_HOST:?PROD_DB_DOCKER_HOST is required}"
       PROD_DB_PORT: "${PROD_DB_EXTERNAL_PORT:?PROD_DB_EXTERNAL_PORT is required}"
+      PROD_REDIS_HOST: "${PROD_REDIS_DOCKER_HOST:?PROD_REDIS_DOCKER_HOST is required}"
+      PROD_REDIS_PORT: "${PROD_REDIS_EXTERNAL_PORT:?PROD_REDIS_EXTERNAL_PORT is required}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

@@ -3,6 +3,7 @@ package com.fox.urlshortener.link;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -33,6 +34,9 @@ class ShortLinkServiceImplTest {
     private ShortCodeGenerator generator;
 
     @Mock
+    private ShortLinkRedirectCache redirectCache;
+
+    @Mock
     private HttpServletRequest request;
 
     private final Clock clock = Clock.fixed(Instant.parse("2026-06-12T10:00:00Z"), ZoneOffset.UTC);
@@ -60,13 +64,46 @@ class ShortLinkServiceImplTest {
     void redirectsActiveNonExpiredLinkAndIncrementsCounter() {
         User user = TestFixtures.user(1L, "fox", UserRole.USER);
         ShortLink link = TestFixtures.link(10L, user);
-        when(repository.incrementClickCount("aB12xZ",
-                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(1);
-        when(repository.findByCode("aB12xZ")).thenReturn(Optional.of(link));
+        when(redirectCache.findOriginalUrl("aB12xZ")).thenReturn(Optional.empty());
+        when(repository.findActiveByCode("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(Optional.of(link));
+        when(redirectCache.incrementClickCount("aB12xZ")).thenReturn(true);
 
-        ShortLink result = service().redirect("aB12xZ");
+        String result = service().redirect("aB12xZ");
 
-        assertThat(result.getOriginalUrl()).isEqualTo("https://example.com");
+        assertThat(result).isEqualTo("https://example.com");
+        verify(redirectCache).putOriginalUrl(
+                "aB12xZ",
+                "https://example.com",
+                java.time.Duration.ofDays(30));
+        verify(redirectCache).incrementClickCount("aB12xZ");
+    }
+
+    @Test
+    void redirectsCachedLinkWithoutDatabaseLookup() {
+        when(redirectCache.findOriginalUrl("aB12xZ"))
+                .thenReturn(Optional.of("https://example.com"));
+        when(redirectCache.incrementClickCount("aB12xZ")).thenReturn(true);
+
+        String result = service().redirect("aB12xZ");
+
+        assertThat(result).isEqualTo("https://example.com");
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void redirectsThroughDatabaseWhenCacheClickIncrementFails() {
+        User user = TestFixtures.user(1L, "fox", UserRole.USER);
+        ShortLink link = TestFixtures.link(10L, user);
+        when(redirectCache.findOriginalUrl("aB12xZ"))
+                .thenReturn(Optional.of("https://cached.example.com"));
+        when(redirectCache.incrementClickCount("aB12xZ")).thenReturn(false);
+        when(repository.findActiveByCode("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(Optional.of(link));
+
+        String result = service().redirect("aB12xZ");
+
+        assertThat(result).isEqualTo("https://example.com");
         verify(repository).incrementClickCount("aB12xZ",
                 Instant.parse("2026-06-12T10:00:00Z"));
     }
@@ -158,8 +195,9 @@ class ShortLinkServiceImplTest {
 
     @Test
     void redirectReturnsNotFoundForInactiveLink() {
-        when(repository.incrementClickCount("aB12xZ",
-                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(0);
+        when(redirectCache.findOriginalUrl("aB12xZ")).thenReturn(Optional.empty());
+        when(repository.findActiveByCode("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(Optional.empty());
         ShortLinkServiceImpl service = service();
 
         assertThatThrownBy(() -> service.redirect("aB12xZ"))
@@ -167,7 +205,7 @@ class ShortLinkServiceImplTest {
     }
 
     private ShortLinkServiceImpl service() {
-        return new ShortLinkServiceImpl(repository, generator, resolver, TestFixtures.properties(),
-                clock);
+        return new ShortLinkServiceImpl(repository, generator, resolver, redirectCache,
+                TestFixtures.properties(), clock);
     }
 }

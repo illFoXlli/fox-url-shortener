@@ -24,6 +24,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     private final ShortLinkRepository shortLinkRepository;
     private final ShortCodeGenerator shortCodeGenerator;
     private final BaseUrlResolver baseUrlResolver;
+    private final ShortLinkRedirectCache redirectCache;
     private final AppProperties appProperties;
     private final Clock clock;
 
@@ -31,11 +32,13 @@ public class ShortLinkServiceImpl implements ShortLinkService {
             ShortLinkRepository shortLinkRepository,
             ShortCodeGenerator shortCodeGenerator,
             BaseUrlResolver baseUrlResolver,
+            ShortLinkRedirectCache redirectCache,
             AppProperties appProperties,
             Clock clock) {
         this.shortLinkRepository = shortLinkRepository;
         this.shortCodeGenerator = shortCodeGenerator;
         this.baseUrlResolver = baseUrlResolver;
+        this.redirectCache = redirectCache;
         this.appProperties = appProperties;
         this.clock = clock;
     }
@@ -83,6 +86,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
             User user,
             HttpServletRequest servletRequest) {
         ShortLink link = ownedOrAdmin(id, user);
+        flushAndEvictRedirectCache(link.getCode());
         Instant expiresAt = request.expiresInDays() == null
                 ? null
                 : Instant.now(clock).plusSeconds(request.expiresInDays() * 86_400L);
@@ -98,6 +102,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
             User user,
             HttpServletRequest servletRequest) {
         ShortLink link = ownedOrAdmin(id, user);
+        flushAndEvictRedirectCache(link.getCode());
         link.setActive(request.active());
         return toResponse(link, servletRequest);
     }
@@ -105,26 +110,40 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     @Override
     @Transactional
     public void softDelete(Long id, User user) {
-        ownedOrAdmin(id, user).setActive(false);
+        ShortLink link = ownedOrAdmin(id, user);
+        flushAndEvictRedirectCache(link.getCode());
+        link.setActive(false);
     }
 
     @Override
     @Transactional
     public void hardDelete(Long id, User user) {
-        shortLinkRepository.delete(ownedOrAdmin(id, user));
+        ShortLink link = ownedOrAdmin(id, user);
+        flushAndEvictRedirectCache(link.getCode());
+        shortLinkRepository.delete(link);
     }
 
     @Override
     @Transactional
-    public ShortLink redirect(String code) {
+    public String redirect(String code) {
         Instant now = Instant.now(clock);
-        int updated = shortLinkRepository.incrementClickCount(code, now);
-        if (updated == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Short link not found");
-        }
-        return shortLinkRepository.findByCode(code)
+
+        return redirectCache.findOriginalUrl(code)
+                .filter(originalUrl -> redirectCache.incrementClickCount(code))
+                .orElseGet(() -> redirectFromDatabase(code, now));
+    }
+
+    private String redirectFromDatabase(String code, Instant now) {
+        ShortLink link = shortLinkRepository.findActiveByCode(code, now)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Short link not found"));
+
+        redirectCache.putOriginalUrl(code, link.getOriginalUrl(),
+                java.time.Duration.between(now, link.getExpiresAt()));
+        if (!redirectCache.incrementClickCount(code)) {
+            shortLinkRepository.incrementClickCount(code, now);
+        }
+        return link.getOriginalUrl();
     }
 
     private ShortLink ownedOrAdmin(Long id, User user) {
@@ -144,6 +163,14 @@ public class ShortLinkServiceImpl implements ShortLinkService {
                 .findFirst()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
                         "Could not generate short code"));
+    }
+
+    private void flushAndEvictRedirectCache(String code) {
+        long clicks = redirectCache.drainClickCount(code);
+        if (clicks > 0) {
+            shortLinkRepository.addClickCount(code, clicks, Instant.now(clock));
+        }
+        redirectCache.evict(code);
     }
 
     private List<ShortLinkResponse> responses(List<ShortLink> links, HttpServletRequest request) {

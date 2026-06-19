@@ -22,7 +22,8 @@ public final class TestFixtures {
                 new AppProperties.Jwt("test_jwt_secret_with_more_than_32_chars", 15, 30),
                 new AppProperties.Cookie("fox_access_token", "fox_refresh_token", false, "Lax", ""),
                 new AppProperties.Cors("http://localhost:3395"),
-                new AppProperties.ShortLink(6, 8, 30, 3600),
+                new AppProperties.ShortLink(6, 8, 30),
+                new AppProperties.RedirectCache(false, "test:short-link:redirect:", 60, 60000),
                 new AppProperties.Forwarded(
                         "X-Forwarded-Proto",
                         "X-Forwarded-Host",

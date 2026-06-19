@@ -17,6 +17,7 @@ import com.fox.urlshortener.auth.User;
 import com.fox.urlshortener.auth.UserRepository;
 import com.fox.urlshortener.auth.UserRole;
 import com.fox.urlshortener.link.BaseUrlResolver;
+import com.fox.urlshortener.link.ShortLinkRedirectCache;
 import com.fox.urlshortener.link.ShortLink;
 import com.fox.urlshortener.link.ShortLinkRepository;
 import com.fox.urlshortener.link.UpdateShortLinkStatusRequest;
@@ -34,6 +35,9 @@ class AdminServiceImplTest {
 
     @Mock
     private ShortLinkRepository linkRepository;
+
+    @Mock
+    private ShortLinkRedirectCache redirectCache;
 
     @Mock
     private HttpServletRequest request;
@@ -143,6 +147,6 @@ class AdminServiceImplTest {
     }
 
     private AdminServiceImpl service() {
-        return new AdminServiceImpl(userRepository, linkRepository, resolver, clock);
+        return new AdminServiceImpl(userRepository, linkRepository, redirectCache, resolver, clock);
     }
 }

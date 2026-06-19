@@ -17,6 +17,14 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
 
     boolean existsByCode(String code);
 
+    @Query("""
+            select link from ShortLink link
+            where link.code = :code
+              and link.active = true
+              and link.expiresAt > :now
+            """)
+    Optional<ShortLink> findActiveByCode(@Param("code") String code, @Param("now") Instant now);
+
     List<ShortLink> findAllByUserOrderByCreatedAtDesc(User user);
 
     List<ShortLink> findAllByUserAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(User user,
@@ -41,6 +49,16 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
               and link.expiresAt > :now
             """)
     int incrementClickCount(@Param("code") String code, @Param("now") Instant now);
+
+    @Modifying
+    @Query("""
+            update ShortLink link
+            set link.clickCount = link.clickCount + :amount,
+                link.updatedAt = :now
+            where link.code = :code
+            """)
+    int addClickCount(@Param("code") String code, @Param("amount") long amount,
+            @Param("now") Instant now);
 
     @Query("""
             select link from ShortLink link

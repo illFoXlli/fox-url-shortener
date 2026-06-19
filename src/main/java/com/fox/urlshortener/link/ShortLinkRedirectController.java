@@ -3,13 +3,9 @@ package com.fox.urlshortener.link;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
 
-import com.fox.urlshortener.config.AppProperties;
-
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +21,10 @@ public class ShortLinkRedirectController {
     private static final String NOT_FOUND_PAGE = "static/404.html";
 
     private final ShortLinkService shortLinkService;
-    private final AppProperties appProperties;
     private final ClassPathResource notFoundPage = new ClassPathResource(NOT_FOUND_PAGE);
 
-    public ShortLinkRedirectController(
-            ShortLinkService shortLinkService,
-            AppProperties appProperties) {
+    public ShortLinkRedirectController(ShortLinkService shortLinkService) {
         this.shortLinkService = shortLinkService;
-        this.appProperties = appProperties;
     }
 
     @GetMapping("/")
@@ -43,13 +35,9 @@ public class ShortLinkRedirectController {
     @GetMapping("/{code:[a-zA-Z0-9]{6,8}}")
     ResponseEntity<String> redirect(@PathVariable String code) throws IOException {
         try {
-            ShortLink link = shortLinkService.redirect(code);
+            String originalUrl = shortLinkService.redirect(code);
             return ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI.create(link.getOriginalUrl()))
-                    .cacheControl(CacheControl
-                            .maxAge(Duration.ofSeconds(appProperties.shortLink()
-                                    .redirectCacheMaxAgeSeconds()))
-                            .cachePublic())
+                    .location(URI.create(originalUrl))
                     .build();
         } catch (ResponseStatusException ex) {
             if (ex.getStatusCode().value() != HttpStatus.NOT_FOUND.value()) {

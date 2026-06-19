@@ -12,6 +12,8 @@ services:
       SPRING_PROFILES_ACTIVE: dev
       DEV_DB_HOST: "${DEV_DB_DOCKER_HOST:?DEV_DB_DOCKER_HOST is required}"
       DEV_DB_PORT: "${DEV_DB_EXTERNAL_PORT:?DEV_DB_EXTERNAL_PORT is required}"
+      DEV_REDIS_HOST: "${DEV_REDIS_DOCKER_HOST:?DEV_REDIS_DOCKER_HOST is required}"
+      DEV_REDIS_PORT: "${DEV_REDIS_EXTERNAL_PORT:?DEV_REDIS_EXTERNAL_PORT is required}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

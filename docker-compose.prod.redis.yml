@@ -1,0 +1,45 @@
+name: "${PROD_REDIS_PROJECT_NAME:?PROD_REDIS_PROJECT_NAME is required}"
+
+services:
+  redis:
+    image: "${PROD_REDIS_IMAGE:?PROD_REDIS_IMAGE is required}"
+    container_name: "${PROD_REDIS_CONTAINER_NAME:?PROD_REDIS_CONTAINER_NAME is required}"
+    environment:
+      REDIS_USERNAME: "${PROD_REDIS_USERNAME:?PROD_REDIS_USERNAME is required}"
+      REDIS_PASSWORD: "${PROD_REDIS_PASSWORD:?PROD_REDIS_PASSWORD is required}"
+      REDIS_PORT: "${PROD_REDIS_INTERNAL_PORT:?PROD_REDIS_INTERNAL_PORT is required}"
+      REDIS_MAXMEMORY: "${PROD_REDIS_MAXMEMORY:?PROD_REDIS_MAXMEMORY is required}"
+      REDIS_MAXMEMORY_POLICY: "${PROD_REDIS_MAXMEMORY_POLICY:?PROD_REDIS_MAXMEMORY_POLICY is required}"
+    command:
+      - redis-server
+      - --port
+      - "${PROD_REDIS_INTERNAL_PORT:?PROD_REDIS_INTERNAL_PORT is required}"
+      - --user
+      - default
+      - "off"
+      - --user
+      - "${PROD_REDIS_USERNAME:?PROD_REDIS_USERNAME is required}"
+      - "on"
+      - ">${PROD_REDIS_PASSWORD:?PROD_REDIS_PASSWORD is required}"
+      - "~*"
+      - "&*"
+      - "+@all"
+      - --appendonly
+      - "no"
+      - --maxmemory
+      - "${PROD_REDIS_MAXMEMORY:?PROD_REDIS_MAXMEMORY is required}"
+      - --maxmemory-policy
+      - "${PROD_REDIS_MAXMEMORY_POLICY:?PROD_REDIS_MAXMEMORY_POLICY is required}"
+    ports:
+      - "${PROD_REDIS_EXTERNAL_PORT:?PROD_REDIS_EXTERNAL_PORT is required}:${PROD_REDIS_INTERNAL_PORT:?PROD_REDIS_INTERNAL_PORT is required}"
+    volumes:
+      - prod-redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$${REDIS_PASSWORD}\" redis-cli --user \"$${REDIS_USERNAME}\" -p \"$${REDIS_PORT}\" ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  prod-redis-data:

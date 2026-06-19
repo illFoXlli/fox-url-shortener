@@ -58,6 +58,7 @@ class AdminBootstrapTest {
                 TestFixtures.properties().cookie(),
                 TestFixtures.properties().cors(),
                 TestFixtures.properties().shortLink(),
+                TestFixtures.properties().redirectCache(),
                 TestFixtures.properties().forwarded());
         AdminBootstrap bootstrap = new AdminBootstrap(userRepository, passwordEncoder, properties);
 

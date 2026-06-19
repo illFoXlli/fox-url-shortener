@@ -3,6 +3,15 @@ spring:
     url: jdbc:postgresql://${DEV_DB_HOST}:${DEV_DB_PORT}/${DEV_DB_NAME}
     username: ${DEV_DB_USERNAME}
     password: ${DEV_DB_PASSWORD}
+  data:
+    redis:
+      host: ${DEV_REDIS_HOST}
+      port: ${DEV_REDIS_PORT}
+      username: ${DEV_REDIS_USERNAME}
+      password: ${DEV_REDIS_PASSWORD}
+      timeout: ${DEV_REDIS_TIMEOUT}
+      ssl:
+        enabled: ${DEV_REDIS_SSL_ENABLED}
 
 server:
   port: ${DEV_APP_INTERNAL_PORT}
@@ -10,8 +19,6 @@ server:
 app:
   base-url: ${DEV_APP_BASE_URL}
   short-url-base-url: ${DEV_SHORT_URL_BASE_URL}
-  short-link:
-    redirect-cache-max-age-seconds: ${DEV_REDIRECT_CACHE_MAX_AGE_SECONDS}
   admin:
     login: ${DEV_ADMIN_LOGIN}
     password: ${DEV_ADMIN_PASSWORD}
@@ -28,6 +35,11 @@ app:
     domain: ${DEV_COOKIE_DOMAIN}
   cors:
     allowed-origins: ${DEV_CORS_ALLOWED_ORIGINS}
+  redirect-cache:
+    enabled: ${DEV_REDIRECT_CACHE_ENABLED}
+    key-prefix: ${DEV_REDIRECT_CACHE_KEY_PREFIX}
+    ttl-seconds: ${DEV_REDIRECT_CACHE_TTL_SECONDS}
+    click-flush-interval-millis: ${DEV_REDIRECT_CACHE_CLICK_FLUSH_INTERVAL_MILLIS}
   forwarded:
     proto-header: ${DEV_FORWARDED_PROTO_HEADER}
     host-header: ${DEV_FORWARDED_HOST_HEADER}
