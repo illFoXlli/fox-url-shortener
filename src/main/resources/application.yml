@@ -29,5 +29,5 @@ springdoc:
 
 logging:
   level:
-    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ${LOG_SECURITY_CONFIG_LEVEL}
-    org.springdoc.core.events.SpringDocAppInitializer: ${LOG_SPRINGDOC_INITIALIZER_LEVEL}
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ${LOG_SECURITY_CONFIG_LEVEL:ERROR}
+    org.springdoc.core.events.SpringDocAppInitializer: ${LOG_SPRINGDOC_INITIALIZER_LEVEL:ERROR}
