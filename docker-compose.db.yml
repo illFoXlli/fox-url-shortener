@@ -1,0 +1,24 @@
+name: "${DEV_DB_PROJECT_NAME:?DEV_DB_PROJECT_NAME is required}"
+
+services:
+  db:
+    image: "${DEV_DB_IMAGE:?DEV_DB_IMAGE is required}"
+    container_name: "${DEV_DB_CONTAINER_NAME:?DEV_DB_CONTAINER_NAME is required}"
+    environment:
+      POSTGRES_DB: "${DEV_DB_NAME:?DEV_DB_NAME is required}"
+      POSTGRES_USER: "${DEV_DB_USERNAME:?DEV_DB_USERNAME is required}"
+      POSTGRES_PASSWORD: "${DEV_DB_PASSWORD:?DEV_DB_PASSWORD is required}"
+    command: ["postgres", "-c", "port=${DEV_DB_INTERNAL_PORT:?DEV_DB_INTERNAL_PORT is required}"]
+    ports:
+      - "${DEV_DB_EXTERNAL_PORT:?DEV_DB_EXTERNAL_PORT is required}:${DEV_DB_INTERNAL_PORT:?DEV_DB_INTERNAL_PORT is required}"
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -p ${DEV_DB_INTERNAL_PORT:?DEV_DB_INTERNAL_PORT is required}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  dev-db-data:

@@ -40,13 +40,42 @@ abstract class IntegrationTestBase {
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
+        registry.add("spring.application.name", () -> "fox-url-shortener-test");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
+        registry.add("spring.jpa.open-in-view", () -> "false");
+        registry.add("spring.flyway.enabled", () -> "true");
+        registry.add("spring.jackson.default-property-inclusion", () -> "non_null");
+        registry.add("server.forward-headers-strategy", () -> "framework");
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("springdoc.api-docs.path", () -> "/v3/api-docs");
+        registry.add("springdoc.swagger-ui.path", () -> "/swagger-ui/index.html");
         registry.add("app.admin.login", () -> "admin");
         registry.add("app.admin.password", () -> "Password123");
-        registry.add("app.jwt.secret", () -> "change_me_to_long_secret_change_me_to_long_secret");
+        registry.add("app.admin.display-name", () -> "Test Admin");
         registry.add("app.base-url", () -> "http://localhost:3396");
+        registry.add("app.short-url-base-url", () -> "http://localhost:3396");
+        registry.add("app.jwt.secret", () -> "test_jwt_secret_with_more_than_32_chars");
+        registry.add("app.jwt.access-expiration-minutes", () -> "15");
+        registry.add("app.jwt.refresh-expiration-days", () -> "30");
+        registry.add("app.cookie.access-token-name", () -> "fox_access_token");
+        registry.add("app.cookie.refresh-token-name", () -> "fox_refresh_token");
+        registry.add("app.cookie.secure", () -> "false");
+        registry.add("app.cookie.same-site", () -> "Lax");
+        registry.add("app.cookie.domain", () -> "");
+        registry.add("app.cors.allowed-origins", () -> "http://localhost:3395");
+        registry.add("app.forwarded.proto-header", () -> "X-Forwarded-Proto");
+        registry.add("app.forwarded.host-header", () -> "X-Forwarded-Host");
+        registry.add("app.forwarded.port-header", () -> "X-Forwarded-Port");
+        registry.add("app.short-link.code-min-length", () -> "6");
+        registry.add("app.short-link.code-max-length", () -> "8");
+        registry.add("app.short-link.default-expiration-days", () -> "30");
+        registry.add(
+                "logging.level.org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer",
+                () -> "error");
+        registry.add("logging.level.org.springdoc.core.events.SpringDocAppInitializer",
+                () -> "error");
     }
 
     Cookie[] registerAndLogin(String login) throws Exception {

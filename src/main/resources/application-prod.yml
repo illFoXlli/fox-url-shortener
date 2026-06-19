@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${PROD_DB_HOST}:${PROD_DB_PORT}/${PROD_DB_NAME}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
+
+server:
+  port: ${PROD_APP_INTERNAL_PORT}
+
+app:
+  base-url: ${PROD_APP_BASE_URL}
+  short-url-base-url: ${PROD_SHORT_URL_BASE_URL}
+  admin:
+    login: ${PROD_ADMIN_LOGIN}
+    password: ${PROD_ADMIN_PASSWORD}
+    display-name: ${PROD_ADMIN_DISPLAY_NAME}
+  jwt:
+    secret: ${PROD_JWT_SECRET}
+    access-expiration-minutes: ${PROD_JWT_ACCESS_EXPIRATION_MINUTES}
+    refresh-expiration-days: ${PROD_JWT_REFRESH_EXPIRATION_DAYS}
+  cookie:
+    access-token-name: ${PROD_COOKIE_ACCESS_TOKEN_NAME}
+    refresh-token-name: ${PROD_COOKIE_REFRESH_TOKEN_NAME}
+    secure: ${PROD_COOKIE_SECURE}
+    same-site: ${PROD_COOKIE_SAME_SITE}
+    domain: ${PROD_COOKIE_DOMAIN}
+  cors:
+    allowed-origins: ${PROD_CORS_ALLOWED_ORIGINS}
+  forwarded:
+    proto-header: ${PROD_FORWARDED_PROTO_HEADER}
+    host-header: ${PROD_FORWARDED_HOST_HEADER}
+    port-header: ${PROD_FORWARDED_PORT_HEADER}

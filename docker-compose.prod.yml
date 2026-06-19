@@ -1,0 +1,19 @@
+name: "${PROD_APP_PROJECT_NAME:?PROD_APP_PROJECT_NAME is required}"
+
+services:
+  backend:
+    build: .
+    image: "${APP_IMAGE:?APP_IMAGE is required}"
+    container_name: "${PROD_APP_CONTAINER_NAME:?PROD_APP_CONTAINER_NAME is required}"
+    env_file:
+      - path: .env
+        required: true
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PROD_DB_HOST: "${PROD_DB_DOCKER_HOST:?PROD_DB_DOCKER_HOST is required}"
+      PROD_DB_PORT: "${PROD_DB_EXTERNAL_PORT:?PROD_DB_EXTERNAL_PORT is required}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${PROD_APP_EXTERNAL_PORT:?PROD_APP_EXTERNAL_PORT is required}:${PROD_APP_INTERNAL_PORT:?PROD_APP_INTERNAL_PORT is required}"
+    restart: unless-stopped

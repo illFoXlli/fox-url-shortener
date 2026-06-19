@@ -1,58 +1,33 @@
 spring:
+  profiles:
+    default: dev
   application:
-    name: fox-url-shortener
-  datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:fox_url_shortener}
-    username: ${DB_USERNAME:fox}
-    password: ${DB_PASSWORD:change_me}
+    name: ${APP_NAME}
   jpa:
     hibernate:
-      ddl-auto: validate
-    open-in-view: false
+      ddl-auto: ${JPA_DDL_AUTO}
+    open-in-view: ${JPA_OPEN_IN_VIEW}
   flyway:
-    enabled: true
+    enabled: ${FLYWAY_ENABLED}
   jackson:
-    default-property-inclusion: non_null
+    default-property-inclusion: ${JACKSON_DEFAULT_PROPERTY_INCLUSION}
 
 server:
-  port: ${APP_PORT:3396}
-  forward-headers-strategy: framework
+  forward-headers-strategy: ${SERVER_FORWARD_HEADERS_STRATEGY}
 
 app:
-  base-url: ${APP_BASE_URL:http://localhost:3396}
-  short-url-base-url: ${SHORT_URL_BASE_URL:http://localhost:3396}
-  admin:
-    login: ${ADMIN_LOGIN:}
-    password: ${ADMIN_PASSWORD:}
-    display-name: ${ADMIN_DISPLAY_NAME:FoX Admin}
-  jwt:
-    secret: ${JWT_SECRET:change_me_to_long_secret_change_me_to_long_secret}
-    access-expiration-minutes: ${JWT_ACCESS_EXPIRATION_MINUTES:15}
-    refresh-expiration-days: ${JWT_REFRESH_EXPIRATION_DAYS:30}
-  cookie:
-    access-token-name: ${COOKIE_ACCESS_TOKEN_NAME:fox_access_token}
-    refresh-token-name: ${COOKIE_REFRESH_TOKEN_NAME:fox_refresh_token}
-    secure: ${COOKIE_SECURE:false}
-    same-site: ${COOKIE_SAME_SITE:Lax}
-    domain: ${COOKIE_DOMAIN:}
-  cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3395}
   short-link:
-    code-min-length: 6
-    code-max-length: 8
-    default-expiration-days: 30
-  forwarded:
-    proto-header: ${FORWARDED_PROTO_HEADER:X-Forwarded-Proto}
-    host-header: ${FORWARDED_HOST_HEADER:X-Forwarded-Host}
-    port-header: ${FORWARDED_PORT_HEADER:X-Forwarded-Port}
+    code-min-length: ${SHORT_LINK_CODE_MIN_LENGTH}
+    code-max-length: ${SHORT_LINK_CODE_MAX_LENGTH}
+    default-expiration-days: ${SHORT_LINK_DEFAULT_EXPIRATION_DAYS}
 
 springdoc:
   api-docs:
-    path: /v3/api-docs
+    path: ${SPRINGDOC_API_DOCS_PATH}
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: ${SPRINGDOC_SWAGGER_UI_PATH}
 
 logging:
   level:
-    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: error
-    org.springdoc.core.events.SpringDocAppInitializer: error
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ${LOG_SECURITY_CONFIG_LEVEL}
+    org.springdoc.core.events.SpringDocAppInitializer: ${LOG_SPRINGDOC_INITIALIZER_LEVEL}

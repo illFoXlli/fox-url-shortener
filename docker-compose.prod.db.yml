@@ -1,0 +1,24 @@
+name: "${PROD_DB_PROJECT_NAME:?PROD_DB_PROJECT_NAME is required}"
+
+services:
+  db:
+    image: "${PROD_DB_IMAGE:?PROD_DB_IMAGE is required}"
+    container_name: "${PROD_DB_CONTAINER_NAME:?PROD_DB_CONTAINER_NAME is required}"
+    environment:
+      POSTGRES_DB: "${PROD_DB_NAME:?PROD_DB_NAME is required}"
+      POSTGRES_USER: "${PROD_DB_USERNAME:?PROD_DB_USERNAME is required}"
+      POSTGRES_PASSWORD: "${PROD_DB_PASSWORD:?PROD_DB_PASSWORD is required}"
+    command: ["postgres", "-c", "port=${PROD_DB_INTERNAL_PORT:?PROD_DB_INTERNAL_PORT is required}"]
+    ports:
+      - "${PROD_DB_EXTERNAL_PORT:?PROD_DB_EXTERNAL_PORT is required}:${PROD_DB_INTERNAL_PORT:?PROD_DB_INTERNAL_PORT is required}"
+    volumes:
+      - prod-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -p ${PROD_DB_INTERNAL_PORT:?PROD_DB_INTERNAL_PORT is required}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  prod-db-data:
