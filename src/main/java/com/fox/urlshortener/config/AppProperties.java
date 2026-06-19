@@ -1,9 +1,9 @@
 package com.fox.urlshortener.config;
 
+import com.fox.urlshortener.link.model.ShortLink;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "app")

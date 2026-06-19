@@ -1,12 +1,10 @@
 package com.fox.urlshortener;
 
-import java.time.Instant;
-
-import com.fox.urlshortener.auth.User;
-import com.fox.urlshortener.auth.UserRole;
+import com.fox.urlshortener.auth.model.User;
+import com.fox.urlshortener.auth.model.UserRole;
 import com.fox.urlshortener.config.AppProperties;
-import com.fox.urlshortener.link.ShortLink;
-
+import com.fox.urlshortener.link.model.ShortLink;
+import java.time.Instant;
 import org.springframework.test.util.ReflectionTestUtils;
 
 public final class TestFixtures {

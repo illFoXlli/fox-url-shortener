@@ -1,10 +1,9 @@
 package com.fox.urlshortener.bootstrap;
 
-import com.fox.urlshortener.auth.User;
-import com.fox.urlshortener.auth.UserRepository;
-import com.fox.urlshortener.auth.UserRole;
+import com.fox.urlshortener.auth.model.User;
+import com.fox.urlshortener.auth.model.UserRole;
+import com.fox.urlshortener.auth.repository.UserRepository;
 import com.fox.urlshortener.config.AppProperties;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;

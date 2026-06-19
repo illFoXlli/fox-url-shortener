@@ -1,9 +1,7 @@
 package com.fox.urlshortener;
 
-import java.util.TimeZone;
-
 import com.fox.urlshortener.config.AppProperties;
-
+import java.util.TimeZone;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

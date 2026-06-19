@@ -7,9 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fox.urlshortener.TestFixtures;
-import com.fox.urlshortener.auth.UserRepository;
+import com.fox.urlshortener.auth.repository.UserRepository;
 import com.fox.urlshortener.config.AppProperties;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

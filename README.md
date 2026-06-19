@@ -10,6 +10,22 @@ Java 21, Gradle, Spring Boot, Spring Web, Spring Security, Spring Data JPA,
 Spring Data Redis, PostgreSQL, Redis, Flyway, JWT, Springdoc OpenAPI, JUnit 5,
 Mockito, Testcontainers, Docker, GitHub Actions, Checkstyle, Spotless, JaCoCo.
 
+## Package layout
+
+Feature packages are split by responsibility first. Interfaces and their
+implementations stay together in the responsibility package:
+
+- `controller` - HTTP controllers.
+- `dto` - request and response records used by controllers and services.
+- `model` - JPA entities, enums, and domain models.
+- `repository` - Spring Data repositories.
+- `security` - auth/security contracts and their implementations.
+- `scheduler` - scheduled jobs, when a feature needs them.
+- `service` - service/cache contracts and their implementations.
+- `support` - internal helpers that do not need a separate interface.
+
+This layout is used for `auth`, `admin`, and `link`.
+
 ## Spring profiles
 
 The application uses two Spring profiles:
