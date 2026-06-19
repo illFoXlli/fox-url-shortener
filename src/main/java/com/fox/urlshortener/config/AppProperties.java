@@ -31,7 +31,11 @@ public record AppProperties(
         }
     }
 
-    public record ShortLink(int codeMinLength, int codeMaxLength, int defaultExpirationDays) {
+    public record ShortLink(
+            int codeMinLength,
+            int codeMaxLength,
+            int defaultExpirationDays,
+            long redirectCacheMaxAgeSeconds) {
     }
 
     public record Cookie(

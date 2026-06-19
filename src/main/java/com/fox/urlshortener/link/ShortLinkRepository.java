@@ -7,7 +7,9 @@ import java.util.Optional;
 import com.fox.urlshortener.auth.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
 
@@ -28,6 +30,17 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
 
     List<ShortLink> findAllByUserIdAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(Long userId,
             Instant now);
+
+    @Modifying
+    @Query("""
+            update ShortLink link
+            set link.clickCount = link.clickCount + 1,
+                link.updatedAt = :now
+            where link.code = :code
+              and link.active = true
+              and link.expiresAt > :now
+            """)
+    int incrementClickCount(@Param("code") String code, @Param("now") Instant now);
 
     @Query("""
             select link from ShortLink link

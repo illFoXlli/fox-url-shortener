@@ -10,6 +10,8 @@ server:
 app:
   base-url: ${PROD_APP_BASE_URL}
   short-url-base-url: ${PROD_SHORT_URL_BASE_URL}
+  short-link:
+    redirect-cache-max-age-seconds: ${PROD_REDIRECT_CACHE_MAX_AGE_SECONDS}
   admin:
     login: ${PROD_ADMIN_LOGIN}
     password: ${PROD_ADMIN_PASSWORD}

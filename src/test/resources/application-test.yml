@@ -37,6 +37,7 @@ app:
     code-min-length: 6
     code-max-length: 8
     default-expiration-days: 30
+    redirect-cache-max-age-seconds: 3600
   forwarded:
     proto-header: X-Forwarded-Proto
     host-header: X-Forwarded-Host

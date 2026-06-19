@@ -117,12 +117,14 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     @Override
     @Transactional
     public ShortLink redirect(String code) {
-        ShortLink link = shortLinkRepository.findByCode(code)
-                .filter(item -> item.isActive() && item.getExpiresAt().isAfter(Instant.now(clock)))
+        Instant now = Instant.now(clock);
+        int updated = shortLinkRepository.incrementClickCount(code, now);
+        if (updated == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Short link not found");
+        }
+        return shortLinkRepository.findByCode(code)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Short link not found"));
-        link.incrementClickCount();
-        return link;
     }
 
     private ShortLink ownedOrAdmin(Long id, User user) {

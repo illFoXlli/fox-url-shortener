@@ -417,6 +417,7 @@ same keys grouped the same way, but without private values.
 | `DEV_JWT_REFRESH_EXPIRATION_DAYS` | Dev refresh token lifetime. |
 | `DEV_APP_BASE_URL` | Dev public API base URL. |
 | `DEV_SHORT_URL_BASE_URL` | Dev public short URL base URL. |
+| `DEV_REDIRECT_CACHE_MAX_AGE_SECONDS` | Dev redirect response cache lifetime in seconds. |
 | `DEV_COOKIE_ACCESS_TOKEN_NAME` | Dev access cookie name. |
 | `DEV_COOKIE_REFRESH_TOKEN_NAME` | Dev refresh cookie name. |
 | `DEV_COOKIE_SECURE` | Whether dev cookies require HTTPS. |
@@ -460,6 +461,7 @@ same keys grouped the same way, but without private values.
 | `PROD_JWT_REFRESH_EXPIRATION_DAYS` | Prod refresh token lifetime. |
 | `PROD_APP_BASE_URL` | Prod public API base URL. |
 | `PROD_SHORT_URL_BASE_URL` | Prod public short URL base URL. |
+| `PROD_REDIRECT_CACHE_MAX_AGE_SECONDS` | Prod redirect response cache lifetime in seconds. |
 | `PROD_COOKIE_ACCESS_TOKEN_NAME` | Prod access cookie name. |
 | `PROD_COOKIE_REFRESH_TOKEN_NAME` | Prod refresh cookie name. |
 | `PROD_COOKIE_SECURE` | Whether prod cookies require HTTPS. |

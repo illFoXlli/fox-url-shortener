@@ -3,9 +3,13 @@ package com.fox.urlshortener.link;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 
+import com.fox.urlshortener.config.AppProperties;
+
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +25,14 @@ public class ShortLinkRedirectController {
     private static final String NOT_FOUND_PAGE = "static/404.html";
 
     private final ShortLinkService shortLinkService;
+    private final AppProperties appProperties;
     private final ClassPathResource notFoundPage = new ClassPathResource(NOT_FOUND_PAGE);
 
-    public ShortLinkRedirectController(ShortLinkService shortLinkService) {
+    public ShortLinkRedirectController(
+            ShortLinkService shortLinkService,
+            AppProperties appProperties) {
         this.shortLinkService = shortLinkService;
+        this.appProperties = appProperties;
     }
 
     @GetMapping("/")
@@ -38,6 +46,10 @@ public class ShortLinkRedirectController {
             ShortLink link = shortLinkService.redirect(code);
             return ResponseEntity.status(HttpStatus.FOUND)
                     .location(URI.create(link.getOriginalUrl()))
+                    .cacheControl(CacheControl
+                            .maxAge(Duration.ofSeconds(appProperties.shortLink()
+                                    .redirectCacheMaxAgeSeconds()))
+                            .cachePublic())
                     .build();
         } catch (ResponseStatusException ex) {
             if (ex.getStatusCode().value() != HttpStatus.NOT_FOUND.value()) {

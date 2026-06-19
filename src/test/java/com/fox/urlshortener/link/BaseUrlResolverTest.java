@@ -1,8 +1,6 @@
 package com.fox.urlshortener.link;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import jakarta.servlet.http.HttpServletRequest;
 
 import com.fox.urlshortener.TestFixtures;
@@ -19,29 +17,16 @@ class BaseUrlResolverTest {
     private HttpServletRequest request;
 
     @Test
-    void usesConfiguredShortUrlBaseWhenForwardedHeadersAreAbsent() {
+    void usesConfiguredShortUrlBaseUrl() {
         BaseUrlResolver resolver = new BaseUrlResolver(TestFixtures.properties());
 
         assertThat(resolver.resolve(request)).isEqualTo("http://localhost:3396");
     }
 
     @Test
-    void usesForwardedHostProtoAndPortWhenPresent() {
-        when(request.getHeader("X-Forwarded-Proto")).thenReturn("https");
-        when(request.getHeader("X-Forwarded-Host")).thenReturn("api.fox.kh.ua");
-        when(request.getHeader("X-Forwarded-Port")).thenReturn("8443");
+    void ignoresForwardedHeadersWhenBuildingShortUrl() {
         BaseUrlResolver resolver = new BaseUrlResolver(TestFixtures.properties());
 
-        assertThat(resolver.resolve(request)).isEqualTo("https://api.fox.kh.ua:8443");
-    }
-
-    @Test
-    void usesRequestHostProtoAndPortWhenForwardedHeadersAreAlreadyApplied() {
-        when(request.getScheme()).thenReturn("https");
-        when(request.getServerName()).thenReturn("api.fox.kh.ua");
-        when(request.getServerPort()).thenReturn(8443);
-        BaseUrlResolver resolver = new BaseUrlResolver(TestFixtures.properties());
-
-        assertThat(resolver.resolve(request)).isEqualTo("https://api.fox.kh.ua:8443");
+        assertThat(resolver.resolve(request)).isEqualTo("http://localhost:3396");
     }
 }

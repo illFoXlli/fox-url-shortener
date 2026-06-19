@@ -31,7 +31,7 @@ class LinksApiIntegrationTest extends IntegrationTestBase {
                         """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.shortUrl").value(org.hamcrest.Matchers.startsWith(
-                        "https://api.fox.kh.ua:8443/")))
+                        "http://localhost/")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();

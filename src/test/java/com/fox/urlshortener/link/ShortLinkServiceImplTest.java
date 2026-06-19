@@ -60,11 +60,15 @@ class ShortLinkServiceImplTest {
     void redirectsActiveNonExpiredLinkAndIncrementsCounter() {
         User user = TestFixtures.user(1L, "fox", UserRole.USER);
         ShortLink link = TestFixtures.link(10L, user);
+        when(repository.incrementClickCount("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(1);
         when(repository.findByCode("aB12xZ")).thenReturn(Optional.of(link));
 
         ShortLink result = service().redirect("aB12xZ");
 
-        assertThat(result.getClickCount()).isEqualTo(1);
+        assertThat(result.getOriginalUrl()).isEqualTo("https://example.com");
+        verify(repository).incrementClickCount("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"));
     }
 
     @Test
@@ -154,10 +158,8 @@ class ShortLinkServiceImplTest {
 
     @Test
     void redirectReturnsNotFoundForInactiveLink() {
-        User user = TestFixtures.user(1L, "fox", UserRole.USER);
-        ShortLink link = TestFixtures.link(10L, user);
-        link.setActive(false);
-        when(repository.findByCode("aB12xZ")).thenReturn(Optional.of(link));
+        when(repository.incrementClickCount("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(0);
         ShortLinkServiceImpl service = service();
 
         assertThatThrownBy(() -> service.redirect("aB12xZ"))

@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 class RedirectEndpointIntegrationTest extends IntegrationTestBase {
@@ -34,7 +35,11 @@ class RedirectEndpointIntegrationTest extends IntegrationTestBase {
 
         mockMvc.perform(get("/{code}", created.get("code").asText()))
                 .andExpect(status().isFound())
-                .andExpect(header().string("Location", "https://example.com/redirect"));
+                .andExpect(header().string("Location", "https://example.com/redirect"))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL,
+                        org.hamcrest.Matchers.allOf(
+                                org.hamcrest.Matchers.containsString("public"),
+                                org.hamcrest.Matchers.containsString("max-age=3600"))));
     }
 
     @Test
