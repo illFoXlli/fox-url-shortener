@@ -114,13 +114,28 @@ cp .env.example .env
 # Fill .env values.
 ```
 
-If dev PostgreSQL is not already running, start it:
+Quick dev startup:
+
+```bash
+./scripts/docker-up.sh
+```
+
+The script reads `SPRING_PROFILES_ACTIVE` from `.env`. For the `dev` profile,
+it checks whether the configured PostgreSQL is available. If PostgreSQL is
+available, it starts only the backend. If PostgreSQL is not available, it starts
+the dev PostgreSQL container from `docker-compose.db.yml`, waits for it, and
+then starts the backend from `docker-compose.yml`.
+
+Manual Docker Compose startup remains available when you want to control the
+database and backend separately.
+
+Start dev PostgreSQL only:
 
 ```bash
 docker compose -f docker-compose.db.yml up -d
 ```
 
-Start the dev backend:
+Start dev backend only:
 
 ```bash
 docker compose up -d --build
