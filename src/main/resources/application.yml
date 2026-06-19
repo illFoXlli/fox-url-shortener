@@ -2,30 +2,30 @@ spring:
   profiles:
     default: dev
   application:
-    name: ${APP_NAME}
+    name: ${APP_NAME:fox-url-shortener}
   jpa:
     hibernate:
-      ddl-auto: ${JPA_DDL_AUTO}
-    open-in-view: ${JPA_OPEN_IN_VIEW}
+      ddl-auto: ${JPA_DDL_AUTO:validate}
+    open-in-view: ${JPA_OPEN_IN_VIEW:false}
   flyway:
-    enabled: ${FLYWAY_ENABLED}
+    enabled: ${FLYWAY_ENABLED:true}
   jackson:
-    default-property-inclusion: ${JACKSON_DEFAULT_PROPERTY_INCLUSION}
+    default-property-inclusion: ${JACKSON_DEFAULT_PROPERTY_INCLUSION:non_null}
 
 server:
-  forward-headers-strategy: ${SERVER_FORWARD_HEADERS_STRATEGY}
+  forward-headers-strategy: ${SERVER_FORWARD_HEADERS_STRATEGY:framework}
 
 app:
   short-link:
-    code-min-length: ${SHORT_LINK_CODE_MIN_LENGTH}
-    code-max-length: ${SHORT_LINK_CODE_MAX_LENGTH}
-    default-expiration-days: ${SHORT_LINK_DEFAULT_EXPIRATION_DAYS}
+    code-min-length: ${SHORT_LINK_CODE_MIN_LENGTH:6}
+    code-max-length: ${SHORT_LINK_CODE_MAX_LENGTH:8}
+    default-expiration-days: ${SHORT_LINK_DEFAULT_EXPIRATION_DAYS:30}
 
 springdoc:
   api-docs:
-    path: ${SPRINGDOC_API_DOCS_PATH}
+    path: ${SPRINGDOC_API_DOCS_PATH:/v3/api-docs}
   swagger-ui:
-    path: ${SPRINGDOC_SWAGGER_UI_PATH}
+    path: ${SPRINGDOC_SWAGGER_UI_PATH:/swagger-ui/index.html}
 
 logging:
   level:
