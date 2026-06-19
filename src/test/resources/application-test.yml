@@ -48,7 +48,7 @@ app:
     default-expiration-days: 30
   redirect-cache:
     enabled: false
-    key-prefix: test:short-link:redirect:
+    key-prefix: "test:short-link:redirect:"
     ttl-seconds: 60
     click-flush-interval-millis: 60000
   forwarded:
