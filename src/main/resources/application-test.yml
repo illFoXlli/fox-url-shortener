@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: fox-url-shortener-test
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 0
+  forward-headers-strategy: framework
+
+app:
+  base-url: http://localhost
+  short-url-base-url: http://localhost
+  admin:
+    login: admin
+    password: Password123
+    display-name: Test Admin
+  jwt:
+    secret: test_jwt_secret_with_more_than_32_chars
+    access-expiration-minutes: 15
+    refresh-expiration-days: 30
+  cookie:
+    access-token-name: fox_access_token
+    refresh-token-name: fox_refresh_token
+    secure: false
+    same-site: Lax
+    domain: ""
+  cors:
+    allowed-origins: http://localhost:3395
+  short-link:
+    code-min-length: 6
+    code-max-length: 8
+    default-expiration-days: 30
+  forwarded:
+    proto-header: X-Forwarded-Proto
+    host-header: X-Forwarded-Host
+    port-header: X-Forwarded-Port
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+
+logging:
+  level:
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    org.springdoc.core.events.SpringDocAppInitializer: ERROR
