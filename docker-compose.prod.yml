@@ -18,4 +18,11 @@ services:
       - "host.docker.internal:host-gateway"
     ports:
       - "${PROD_APP_EXTERNAL_PORT:?PROD_APP_EXTERNAL_PORT is required}:${PROD_APP_INTERNAL_PORT:?PROD_APP_INTERNAL_PORT is required}"
+    networks:
+      - servers-net
     restart: unless-stopped
+
+networks:
+  servers-net:
+    external: true
+    name: servers-net

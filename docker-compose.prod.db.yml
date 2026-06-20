@@ -12,7 +12,11 @@ services:
     ports:
       - "${PROD_DB_EXTERNAL_PORT:?PROD_DB_EXTERNAL_PORT is required}:${PROD_DB_INTERNAL_PORT:?PROD_DB_INTERNAL_PORT is required}"
     volumes:
-      - prod-db-data:/var/lib/postgresql/data
+      - shared-postgres-data:/var/lib/postgresql/data
+    networks:
+      servers-net:
+        aliases:
+          - postgres
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -p ${PROD_DB_INTERNAL_PORT:?PROD_DB_INTERNAL_PORT is required}"]
       interval: 5s
@@ -20,5 +24,12 @@ services:
       retries: 10
     restart: unless-stopped
 
+networks:
+  servers-net:
+    external: true
+    name: servers-net
+
 volumes:
-  prod-db-data:
+  shared-postgres-data:
+    external: true
+    name: "${PROD_DB_DATA_VOLUME:?PROD_DB_DATA_VOLUME is required}"

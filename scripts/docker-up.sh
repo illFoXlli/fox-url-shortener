@@ -93,6 +93,15 @@ database_compose_missing_vars() {
     fi
   done
 
+  if [ "$spring_profile" = "prod" ]; then
+    key="${profile_prefix}_DB_DATA_VOLUME"
+    value=$(env_value "$key")
+
+    if [ -z "$value" ]; then
+      missing="${missing} ${key}"
+    fi
+  fi
+
   echo "$missing"
 }
 
@@ -308,16 +317,16 @@ elif [ "$spring_profile" = "prod" ]; then
   if database_port_is_open; then
     echo "PostgreSQL port is reachable, but login to database '${db_name}' as '${db_user}' failed."
     echo "Check ${profile_prefix}_DB_NAME, ${profile_prefix}_DB_USERNAME, and ${profile_prefix}_DB_PASSWORD."
+    echo "If this is the shared local server, check that postgres-server uses the servers-stack_postgres_server_data volume."
+    exit 1
   fi
-  echo "Production database will not be created automatically by this script."
+  echo "Starting production PostgreSQL from ${db_compose_file}"
   missing=$(database_compose_missing_vars)
-  if [ -n "$missing" ]; then
-    echo "Before creating production PostgreSQL from compose, fill:${missing}"
-  fi
-  echo "If you really need to create it, run:"
-  echo "  docker compose -f ${db_compose_file} up -d"
-  echo "Then run this script again."
-  exit 1
+  [ -z "$missing" ] || fail "Cannot start production PostgreSQL. Missing:${missing}"
+
+  docker compose -f "$db_compose_file" up -d
+
+  wait_for_database
 else
   echo "Configured PostgreSQL is not available at ${db_host}:${db_port}"
   echo "Starting local dev PostgreSQL from ${db_compose_file}"

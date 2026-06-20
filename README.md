@@ -85,8 +85,8 @@ Dev:
 Prod:
 
 - `docker-compose.prod.yml` - prod backend only.
-- `docker-compose.prod.db.yml` - prod PostgreSQL only, used only if production
-  PostgreSQL does not already exist.
+- `docker-compose.prod.db.yml` - prod PostgreSQL only. Locally it must use
+  PostgreSQL 16 and the external volume `servers-stack_postgres_server_data`.
 - `docker-compose.prod.redis.yml` - prod Redis only, used only if production
   Redis does not already exist.
 
@@ -118,6 +118,10 @@ redis-infra
 
 The backend compose files do not own PostgreSQL or Redis. Infrastructure can
 already exist, or it can be started separately with the matching compose file.
+The local shared PostgreSQL container is `postgres-server` on `servers-net`;
+it uses the `servers-stack_postgres_server_data` volume and contains the
+`fox_url_shortener`, `bread2026`, `paska2026`, `task_manager`, and
+`task_manager_test` databases.
 
 For Docker backend startup, the compose files intentionally override the
 profile database address:
@@ -290,7 +294,8 @@ does not start Docker containers automatically.
 Use this only when you want to test production profile behavior from the project
 folder.
 
-If prod PostgreSQL does not already exist, start it:
+If prod PostgreSQL does not already exist, start it. The local prod DB compose
+uses the external `servers-stack_postgres_server_data` volume:
 
 ```bash
 cd /Users/denysrud/Servers/fox-url-shortener
@@ -327,8 +332,8 @@ For a real production deployment, use production-safe values in `.env`, such as:
 - production Redis credentials
 
 If production PostgreSQL already exists as `postgres-infra / postgres-server`,
-do not start `docker-compose.prod.db.yml`. Fill the prod database variables for
-the existing database and start only the prod backend.
+`docker-compose.prod.db.yml` will attach to that same external volume when it
+needs to recreate the container.
 
 If production Redis already exists as `redis-infra / redis-server`, do not
 start `docker-compose.prod.redis.yml`. Fill the prod Redis variables for the
@@ -343,10 +348,10 @@ docker compose -f docker-compose.prod.db.yml up -d
 
 Then start the prod backend.
 
-The production database compose identity/image/internal-port variables are only
-needed when you want to create PostgreSQL from `docker-compose.prod.db.yml`.
-They are not needed for a backend-only start against an already existing
-database.
+The production database compose identity/image/internal-port/data-volume
+variables are needed when you want to create PostgreSQL from
+`docker-compose.prod.db.yml`. Locally `PROD_DB_IMAGE` should stay on
+`postgres:16-alpine` because the shared data volume is PostgreSQL 16.
 
 The same applies to the production Redis compose identity/image/internal-port
 variables and `docker-compose.prod.redis.yml`.
@@ -369,9 +374,11 @@ Redis is not available, it starts the dev Redis container from
 `docker-compose.redis.yml`, waits until it is available, and then starts the dev
 backend from `docker-compose.yml`.
 
-For the `prod` profile, the script does not create a production database
-automatically. If the configured production PostgreSQL is not available, the
-script stops and prints an instruction to start the database explicitly.
+For the `prod` profile, if the configured production PostgreSQL is not
+available and the port is free, the script starts PostgreSQL from
+`docker-compose.prod.db.yml` and waits for it. If port `5432` is already open
+but login to the configured database fails, the script stops so you can fix the
+wrong container/volume instead of creating a second database.
 If production database compose variables are missing, the script prints which
 ones must be filled before using `docker-compose.prod.db.yml`.
 If production Redis is not available, the script prints a warning and starts
@@ -624,6 +631,7 @@ same keys grouped the same way, but without private values.
 | `PROD_DB_USERNAME` | Prod database username. |
 | `PROD_DB_PASSWORD` | Prod database password. |
 | `PROD_DB_IMAGE` | PostgreSQL image for prod database container, if it needs to be created. |
+| `PROD_DB_DATA_VOLUME` | External Docker volume for prod PostgreSQL data. Local shared value: `servers-stack_postgres_server_data`. |
 | `PROD_DB_EXTERNAL_PORT` | Host port exposed by prod PostgreSQL and used by the Docker backend through `PROD_DB_DOCKER_HOST`. Fill it even when the database already exists. |
 | `PROD_DB_INTERNAL_HOST` | Reserved internal prod database host name for compose-style setups. |
 | `PROD_DB_INTERNAL_PORT` | Internal PostgreSQL port inside the container. |
