@@ -11,6 +11,7 @@ import com.fox.urlshortener.auth.model.User;
 import com.fox.urlshortener.auth.model.UserRole;
 import com.fox.urlshortener.link.dto.CreateShortLinkRequest;
 import com.fox.urlshortener.link.dto.ShortLinkResponse;
+import com.fox.urlshortener.link.dto.ShortLinkStatsResponse;
 import com.fox.urlshortener.link.dto.UpdateShortLinkRequest;
 import com.fox.urlshortener.link.dto.UpdateShortLinkStatusRequest;
 import com.fox.urlshortener.link.model.ShortLink;
@@ -169,14 +170,20 @@ class ShortLinkServiceImplTest {
     }
 
     @Test
-    void hardDeleteRemovesOwnedLink() {
+    void statsFlushesPendingClicks() {
         User owner = TestFixtures.user(1L, "owner", UserRole.USER);
         ShortLink link = TestFixtures.link(10L, owner);
         when(repository.findById(10L)).thenReturn(Optional.of(link));
+        when(redirectCache.drainClickCount("aB12xZ")).thenReturn(3L);
 
-        service().hardDelete(10L, owner);
+        ShortLinkStatsResponse response = service().stats(10L, owner);
 
-        verify(repository).delete(link);
+        assertThat(response.id()).isEqualTo(10L);
+        assertThat(response.code()).isEqualTo("aB12xZ");
+        assertThat(response.clickCount()).isEqualTo(3L);
+        assertThat(response.active()).isTrue();
+        verify(repository).addClickCount("aB12xZ", 3L,
+                Instant.parse("2026-06-12T10:00:00Z"));
     }
 
     @Test

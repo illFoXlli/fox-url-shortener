@@ -1,5 +1,6 @@
 package com.fox.urlshortener.integration;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,5 +50,9 @@ class AdminApiIntegrationTest extends IntegrationTestBase {
                         """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
+
+        mockMvc.perform(delete("/api/v1/admin/links/{id}/hard", created.get("id").asLong())
+                .cookie(adminCookies))
+                .andExpect(status().isNoContent());
     }
 }

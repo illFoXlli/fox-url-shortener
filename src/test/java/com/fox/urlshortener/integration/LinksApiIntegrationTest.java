@@ -36,6 +36,7 @@ class LinksApiIntegrationTest extends IntegrationTestBase {
 
         JsonNode created = json(createdBody);
         long id = created.get("id").asLong();
+        String code = created.get("code").asText();
 
         mockMvc.perform(get("/api/v1/links")
                 .cookie(cookies))
@@ -47,6 +48,14 @@ class LinksApiIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].active").value(true));
 
+        mockMvc.perform(get("/api/v1/links/{id}/stats", id)
+                .cookie(cookies))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.code").value(code))
+                .andExpect(jsonPath("$.clickCount").value(0))
+                .andExpect(jsonPath("$.active").value(true));
+
         mockMvc.perform(patch("/api/v1/links/{id}/status", id)
                 .cookie(cookies)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -56,8 +65,18 @@ class LinksApiIntegrationTest extends IntegrationTestBase {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
 
-        mockMvc.perform(delete("/api/v1/links/{id}/hard", id)
+        mockMvc.perform(delete("/api/v1/links/{id}", id)
                 .cookie(cookies))
                 .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/v1/links/{id}/stats", id)
+                .cookie(cookies))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.clickCount").value(0))
+                .andExpect(jsonPath("$.active").value(false));
+
+        mockMvc.perform(delete("/api/v1/links/{id}/hard", id)
+                .cookie(cookies))
+                .andExpect(status().isNotFound());
     }
 }

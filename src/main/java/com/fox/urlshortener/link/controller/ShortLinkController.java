@@ -4,6 +4,7 @@ import com.fox.urlshortener.auth.model.User;
 import com.fox.urlshortener.link.service.ShortLinkService;
 import com.fox.urlshortener.link.dto.CreateShortLinkRequest;
 import com.fox.urlshortener.link.dto.ShortLinkResponse;
+import com.fox.urlshortener.link.dto.ShortLinkStatsResponse;
 import com.fox.urlshortener.link.dto.UpdateShortLinkRequest;
 import com.fox.urlshortener.link.dto.UpdateShortLinkStatusRequest;
 import com.fox.urlshortener.security.CurrentUser;
@@ -62,6 +63,11 @@ public class ShortLinkController {
         return shortLinkService.get(id, user(authentication), servletRequest);
     }
 
+    @GetMapping("/{id}/stats")
+    ShortLinkStatsResponse stats(@PathVariable Long id, Authentication authentication) {
+        return shortLinkService.stats(id, user(authentication));
+    }
+
     @PatchMapping("/{id}")
     ShortLinkResponse update(
             @PathVariable Long id,
@@ -84,12 +90,6 @@ public class ShortLinkController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void softDelete(@PathVariable Long id, Authentication authentication) {
         shortLinkService.softDelete(id, user(authentication));
-    }
-
-    @DeleteMapping("/{id}/hard")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    void hardDelete(@PathVariable Long id, Authentication authentication) {
-        shortLinkService.hardDelete(id, user(authentication));
     }
 
     private User user(Authentication authentication) {

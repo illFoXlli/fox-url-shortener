@@ -5,6 +5,7 @@ import com.fox.urlshortener.auth.model.UserRole;
 import com.fox.urlshortener.config.AppProperties;
 import com.fox.urlshortener.link.dto.CreateShortLinkRequest;
 import com.fox.urlshortener.link.dto.ShortLinkResponse;
+import com.fox.urlshortener.link.dto.ShortLinkStatsResponse;
 import com.fox.urlshortener.link.dto.UpdateShortLinkRequest;
 import com.fox.urlshortener.link.dto.UpdateShortLinkStatusRequest;
 import com.fox.urlshortener.link.model.ShortLink;
@@ -85,6 +86,18 @@ public class ShortLinkServiceImpl implements ShortLinkService {
 
     @Override
     @Transactional
+    public ShortLinkStatsResponse stats(Long id, User user) {
+        ShortLink link = ownedOrAdmin(id, user);
+        long pendingClicks = flushClickCount(link.getCode());
+        return new ShortLinkStatsResponse(
+                link.getId(),
+                link.getCode(),
+                link.getClickCount() + pendingClicks,
+                link.isActive());
+    }
+
+    @Override
+    @Transactional
     public ShortLinkResponse update(
             Long id,
             UpdateShortLinkRequest request,
@@ -118,14 +131,6 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         ShortLink link = ownedOrAdmin(id, user);
         flushAndEvictRedirectCache(link.getCode());
         link.setActive(false);
-    }
-
-    @Override
-    @Transactional
-    public void hardDelete(Long id, User user) {
-        ShortLink link = ownedOrAdmin(id, user);
-        flushAndEvictRedirectCache(link.getCode());
-        shortLinkRepository.delete(link);
     }
 
     @Override
@@ -183,11 +188,16 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     }
 
     private void flushAndEvictRedirectCache(String code) {
+        flushClickCount(code);
+        redirectCache.evict(code);
+    }
+
+    private long flushClickCount(String code) {
         long clicks = redirectCache.drainClickCount(code);
         if (clicks > 0) {
             shortLinkRepository.addClickCount(code, clicks, Instant.now(clock));
         }
-        redirectCache.evict(code);
+        return clicks;
     }
 
     private List<ShortLinkResponse> responses(List<ShortLink> links, HttpServletRequest request) {
