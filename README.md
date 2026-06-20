@@ -688,6 +688,40 @@ chmod +x .git/hooks/pre-commit
 
 ## Curl examples
 
+Successful `register`, `login`, and `refresh` responses include an
+`accessToken` JWT in the response body and also set auth cookies. Protected API
+requests may use the cookies or send the JWT as `Authorization: Bearer <token>`.
+
+User link statistics are available through:
+
+```text
+GET /api/v1/links/{id}/stats
+```
+
+The stats response uses `ShortLinkStatsResponse`:
+
+```json
+{
+  "id": 1,
+  "code": "aB12xZ",
+  "clickCount": 5,
+  "active": true
+}
+```
+
+Regular users can soft-delete links with `DELETE /api/v1/links/{id}` so their
+link history and statistics remain available. Hard delete is available only in
+the admin API through `DELETE /api/v1/admin/links/{linkId}/hard`.
+
+Opening an expired active short link returns `410 Gone`. Missing or disabled
+short links still return `404 Not Found`.
+
+A Postman collection is available at:
+
+```text
+postman/Shortener URL.postman_collection.json
+```
+
 Register:
 
 ```bash
@@ -734,6 +768,13 @@ Get links:
 curl -b /tmp/fox-url-shortener.cookies http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links
 ```
 
+Get link stats:
+
+```bash
+curl -b /tmp/fox-url-shortener.cookies \
+  http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links/1/stats
+```
+
 Disable link:
 
 ```bash
@@ -743,11 +784,11 @@ curl -X PATCH http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links/1/status \
   -d '{"active":false}'
 ```
 
-Hard delete link:
+Soft delete link:
 
 ```bash
 curl -X DELETE -b /tmp/fox-url-shortener.cookies \
-  http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links/1/hard
+  http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links/1
 ```
 
 Admin get users:
@@ -772,9 +813,15 @@ curl -X PATCH http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/links/1/sta
   -d '{"active":false}'
 ```
 
+Admin hard delete any link:
+
+```bash
+curl -X DELETE -b /tmp/fox-url-shortener-admin.cookies \
+  http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/links/1/hard
+```
+
 Redirect by code:
 
 ```bash
 curl -i http://localhost:${DEV_APP_EXTERNAL_PORT}/aB12xZ
 ```
-
