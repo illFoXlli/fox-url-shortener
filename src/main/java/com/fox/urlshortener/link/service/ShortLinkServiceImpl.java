@@ -140,8 +140,7 @@ public class ShortLinkServiceImpl implements ShortLinkService {
 
     private String redirectFromDatabase(String code, Instant now) {
         ShortLink link = shortLinkRepository.findActiveByCode(code, now)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Short link not found"));
+                .orElseGet(() -> redirectFallback(code, now));
 
         redirectCache.putOriginalUrl(code, link.getOriginalUrl(),
                 java.time.Duration.between(now, link.getExpiresAt()));
@@ -149,6 +148,19 @@ public class ShortLinkServiceImpl implements ShortLinkService {
             shortLinkRepository.incrementClickCount(code, now);
         }
         return link.getOriginalUrl();
+    }
+
+    private ShortLink redirectFallback(String code, Instant now) {
+        ShortLink link = shortLinkRepository.findByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Short link not found"));
+        if (!link.isActive()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Short link not found");
+        }
+        if (!link.getExpiresAt().isAfter(now)) {
+            throw new ResponseStatusException(HttpStatus.GONE, "Short link expired");
+        }
+        return link;
     }
 
     private ShortLink ownedOrAdmin(Long id, User user) {

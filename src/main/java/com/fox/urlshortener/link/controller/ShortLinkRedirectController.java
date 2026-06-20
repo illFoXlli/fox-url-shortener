@@ -40,6 +40,9 @@ public class ShortLinkRedirectController {
                     .location(URI.create(originalUrl))
                     .build();
         } catch (ResponseStatusException ex) {
+            if (ex.getStatusCode().value() == HttpStatus.GONE.value()) {
+                return ResponseEntity.status(HttpStatus.GONE).build();
+            }
             if (ex.getStatusCode().value() != HttpStatus.NOT_FOUND.value()) {
                 throw ex;
             }

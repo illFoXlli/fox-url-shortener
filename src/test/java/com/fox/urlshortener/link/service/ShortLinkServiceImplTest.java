@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @ExtendWith(MockitoExtension.class)
@@ -200,13 +201,37 @@ class ShortLinkServiceImplTest {
 
     @Test
     void redirectReturnsNotFoundForInactiveLink() {
+        User user = TestFixtures.user(1L, "fox", UserRole.USER);
+        ShortLink link = TestFixtures.link(10L, user);
+        link.setActive(false);
         when(redirectCache.findOriginalUrl("aB12xZ")).thenReturn(Optional.empty());
         when(repository.findActiveByCode("aB12xZ",
                 Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(Optional.empty());
+        when(repository.findByCode("aB12xZ")).thenReturn(Optional.of(link));
         ShortLinkServiceImpl service = service();
 
         assertThatThrownBy(() -> service.redirect("aB12xZ"))
-                .isInstanceOf(ResponseStatusException.class);
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
+    @Test
+    void redirectReturnsGoneForExpiredLink() {
+        User user = TestFixtures.user(1L, "fox", UserRole.USER);
+        ShortLink link = new ShortLink(
+                "aB12xZ",
+                "https://example.com",
+                Instant.parse("2026-06-12T09:59:59Z"),
+                user);
+        when(redirectCache.findOriginalUrl("aB12xZ")).thenReturn(Optional.empty());
+        when(repository.findActiveByCode("aB12xZ",
+                Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(Optional.empty());
+        when(repository.findByCode("aB12xZ")).thenReturn(Optional.of(link));
+        ShortLinkServiceImpl service = service();
+
+        assertThatThrownBy(() -> service.redirect("aB12xZ"))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        ex -> assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.GONE));
     }
 
     private ShortLinkServiceImpl service() {

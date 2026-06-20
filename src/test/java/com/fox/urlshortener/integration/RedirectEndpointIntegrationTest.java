@@ -8,11 +8,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fox.urlshortener.link.repository.ShortLinkRepository;
 import jakarta.servlet.http.Cookie;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 class RedirectEndpointIntegrationTest extends IntegrationTestBase {
+
+    @Autowired
+    private ShortLinkRepository shortLinkRepository;
 
     @Test
     void publicRedirectSendsUserToOriginalUrl() throws Exception {
@@ -64,6 +70,32 @@ class RedirectEndpointIntegrationTest extends IntegrationTestBase {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(
                         "Link unavailable")));
+    }
+
+    @Test
+    void expiredLinkReturnsGone() throws Exception {
+        Cookie[] cookies = registerAndLogin("fox_redirect_expired");
+
+        String createdBody = mockMvc.perform(post("/api/v1/links")
+                .cookie(cookies)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                                                {"originalUrl":"https://example.com/expired","expiresInDays":30}
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        JsonNode created = json(createdBody);
+
+        shortLinkRepository.findById(created.get("id").asLong()).ifPresent(link -> {
+            link.update(null, Instant.parse("2026-01-01T00:00:00Z"), null);
+            shortLinkRepository.saveAndFlush(link);
+        });
+
+        mockMvc.perform(get("/{code}", created.get("code").asText()))
+                .andExpect(status().isGone());
     }
 
     @Test
