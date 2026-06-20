@@ -44,7 +44,7 @@ public class AuthController {
             HttpServletResponse servletResponse) {
         AuthSession session = authService.register(request, servletRequest);
         authCookieService.addAuthCookies(servletResponse, session);
-        return new AuthResponse(session.user());
+        return AuthResponse.from(session);
     }
 
     @PostMapping("/login")
@@ -53,7 +53,7 @@ public class AuthController {
             HttpServletResponse servletResponse) {
         AuthSession session = authService.login(request, servletRequest);
         authCookieService.addAuthCookies(servletResponse, session);
-        return new AuthResponse(session.user());
+        return AuthResponse.from(session);
     }
 
     @PostMapping("/refresh")
@@ -62,7 +62,7 @@ public class AuthController {
         AuthSession session = authService.refresh(authCookieService.refreshToken(servletRequest),
                 servletRequest);
         authCookieService.addAuthCookies(servletResponse, session);
-        return new AuthResponse(session.user());
+        return AuthResponse.from(session);
     }
 
     @PostMapping("/logout")

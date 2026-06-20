@@ -19,9 +19,10 @@ class AuthApiIntegrationTest extends IntegrationTestBase {
         var registerResult = mockMvc.perform(post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"login":"%s","password":"Password123"}
+                                        {"login":"%s","password":"Password123"}
                         """.formatted(login)))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.user.login").value(login))
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
                 .andReturn();
@@ -38,9 +39,10 @@ class AuthApiIntegrationTest extends IntegrationTestBase {
         var loginResult = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                        {"login":"%s","password":"Password123"}
+                                        {"login":"%s","password":"Password123"}
                         """.formatted(login)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.user.login").value(login))
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
                 .andReturn();
@@ -51,6 +53,7 @@ class AuthApiIntegrationTest extends IntegrationTestBase {
         mockMvc.perform(post("/api/v1/auth/refresh")
                 .cookie(loginCookies))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.user.login").value(login))
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE));
     }
