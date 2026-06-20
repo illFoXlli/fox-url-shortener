@@ -211,7 +211,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/links",
+              "raw": "{{baseUrl}}/api/v1/links?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -219,6 +219,20 @@
                 "api",
                 "v1",
                 "links"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           },
@@ -248,7 +262,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/links/active",
+              "raw": "{{baseUrl}}/api/v1/links/active?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -257,6 +271,20 @@
                 "v1",
                 "links",
                 "active"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           },
@@ -508,7 +536,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "raw": "{{baseUrl}}/api/v1/admin/users?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -517,6 +545,20 @@
                 "v1",
                 "admin",
                 "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           },
@@ -546,7 +588,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{UserId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -554,7 +596,8 @@
                 "api",
                 "v1",
                 "admin",
-                "users"
+                "users",
+                "{{UserId}}"
               ]
             }
           },
@@ -584,7 +627,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users/{{UserId}}/links",
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{UserId}}/links?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -595,6 +638,20 @@
                 "users",
                 "{{UserId}}",
                 "links"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           },
@@ -624,7 +681,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users/{{UserId}}/links/active",
+              "raw": "{{baseUrl}}/api/v1/admin/users/{{UserId}}/links/active?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -636,6 +693,20 @@
                 "{{UserId}}",
                 "links",
                 "active"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           },
@@ -709,7 +780,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/users/{{UserId}}/links/active",
+              "raw": "{{baseUrl}}/api/v1/admin/links?page=0&size=20&sort=createdAt,desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -717,10 +788,36 @@
                 "api",
                 "v1",
                 "admin",
-                "users",
-                "{{UserId}}",
-                "links",
-                "active"
+                "links"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true",
+                  "disabled": true
+                },
+                {
+                  "key": "expired",
+                  "value": "false",
+                  "disabled": true
+                },
+                {
+                  "key": "login",
+                  "value": "fox",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
               ]
             }
           },

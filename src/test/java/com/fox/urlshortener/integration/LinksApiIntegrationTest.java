@@ -41,12 +41,14 @@ class LinksApiIntegrationTest extends IntegrationTestBase {
         mockMvc.perform(get("/api/v1/links")
                 .cookie(cookies))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(id));
+                .andExpect(jsonPath("$.content[0].id").value(id))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.size").value(20));
 
         mockMvc.perform(get("/api/v1/links/active")
                 .cookie(cookies))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].active").value(true));
+                .andExpect(jsonPath("$.content[0].active").value(true));
 
         mockMvc.perform(get("/api/v1/links/{id}/stats", id)
                 .cookie(cookies))

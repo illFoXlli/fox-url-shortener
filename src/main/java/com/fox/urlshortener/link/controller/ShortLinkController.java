@@ -10,7 +10,10 @@ import com.fox.urlshortener.link.dto.UpdateShortLinkStatusRequest;
 import com.fox.urlshortener.security.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -45,14 +48,19 @@ public class ShortLinkController {
     }
 
     @GetMapping
-    List<ShortLinkResponse> mine(Authentication authentication, HttpServletRequest servletRequest) {
-        return shortLinkService.mine(user(authentication), servletRequest);
+    Page<ShortLinkResponse> mine(
+            Authentication authentication,
+            HttpServletRequest servletRequest,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return shortLinkService.mine(user(authentication), servletRequest, pageable);
     }
 
     @GetMapping("/active")
-    List<ShortLinkResponse> activeMine(Authentication authentication,
-            HttpServletRequest servletRequest) {
-        return shortLinkService.activeMine(user(authentication), servletRequest);
+    Page<ShortLinkResponse> activeMine(
+            Authentication authentication,
+            HttpServletRequest servletRequest,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return shortLinkService.activeMine(user(authentication), servletRequest, pageable);
     }
 
     @GetMapping("/{id}")

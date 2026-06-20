@@ -7,7 +7,10 @@ import com.fox.urlshortener.admin.dto.AdminUserResponse;
 import com.fox.urlshortener.link.dto.UpdateShortLinkStatusRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +33,9 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    List<AdminUserResponse> users() {
-        return adminService.users();
+    Page<AdminUserResponse> users(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return adminService.users(pageable);
     }
 
     @GetMapping("/users/{userId}")
@@ -40,22 +44,29 @@ public class AdminController {
     }
 
     @GetMapping("/links")
-    List<AdminLinkResponse> links(
+    Page<AdminLinkResponse> links(
             @RequestParam(required = false) Boolean active,
             @RequestParam(required = false) Boolean expired,
             @RequestParam(required = false) String login,
-            HttpServletRequest request) {
-        return adminService.links(active, expired, login, request);
+            HttpServletRequest request,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return adminService.links(active, expired, login, request, pageable);
     }
 
     @GetMapping("/users/{userId}/links")
-    List<AdminLinkResponse> userLinks(@PathVariable Long userId, HttpServletRequest request) {
-        return adminService.userLinks(userId, request);
+    Page<AdminLinkResponse> userLinks(
+            @PathVariable Long userId,
+            HttpServletRequest request,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return adminService.userLinks(userId, request, pageable);
     }
 
     @GetMapping("/users/{userId}/links/active")
-    List<AdminLinkResponse> activeUserLinks(@PathVariable Long userId, HttpServletRequest request) {
-        return adminService.activeUserLinks(userId, request);
+    Page<AdminLinkResponse> activeUserLinks(
+            @PathVariable Long userId,
+            HttpServletRequest request,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return adminService.activeUserLinks(userId, request, pageable);
     }
 
     @GetMapping("/links/{linkId}")

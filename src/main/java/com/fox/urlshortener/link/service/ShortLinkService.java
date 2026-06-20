@@ -7,16 +7,18 @@ import com.fox.urlshortener.link.dto.ShortLinkStatsResponse;
 import com.fox.urlshortener.link.dto.UpdateShortLinkRequest;
 import com.fox.urlshortener.link.dto.UpdateShortLinkStatusRequest;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ShortLinkService {
 
     ShortLinkResponse create(CreateShortLinkRequest request, User user,
             HttpServletRequest servletRequest);
 
-    List<ShortLinkResponse> mine(User user, HttpServletRequest servletRequest);
+    Page<ShortLinkResponse> mine(User user, HttpServletRequest servletRequest, Pageable pageable);
 
-    List<ShortLinkResponse> activeMine(User user, HttpServletRequest servletRequest);
+    Page<ShortLinkResponse> activeMine(User user, HttpServletRequest servletRequest,
+            Pageable pageable);
 
     ShortLinkResponse get(Long id, User user, HttpServletRequest servletRequest);
 

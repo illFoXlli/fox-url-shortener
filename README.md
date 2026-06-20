@@ -713,6 +713,25 @@ Regular users can soft-delete links with `DELETE /api/v1/links/{id}` so their
 link history and statistics remain available. Hard delete is available only in
 the admin API through `DELETE /api/v1/admin/links/{linkId}/hard`.
 
+List endpoints return Spring `Page` responses and accept standard zero-based
+pagination query params:
+
+```text
+page=0&size=20&sort=createdAt,desc
+```
+
+This applies to:
+
+- `GET /api/v1/links`
+- `GET /api/v1/links/active`
+- `GET /api/v1/admin/users`
+- `GET /api/v1/admin/links`
+- `GET /api/v1/admin/users/{userId}/links`
+- `GET /api/v1/admin/users/{userId}/links/active`
+
+Paged responses include items in `content` plus metadata such as `totalElements`,
+`totalPages`, `number`, and `size`.
+
 Opening an expired active short link returns `410 Gone`. Missing or disabled
 short links still return `404 Not Found`.
 
@@ -765,7 +784,8 @@ curl -X POST http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links \
 Get links:
 
 ```bash
-curl -b /tmp/fox-url-shortener.cookies http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links
+curl -b /tmp/fox-url-shortener.cookies \
+  'http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/links?page=0&size=20&sort=createdAt,desc'
 ```
 
 Get link stats:
@@ -794,14 +814,22 @@ curl -X DELETE -b /tmp/fox-url-shortener.cookies \
 Admin get users:
 
 ```bash
-curl -b /tmp/fox-url-shortener-admin.cookies http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/users
+curl -b /tmp/fox-url-shortener-admin.cookies \
+  'http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/users?page=0&size=20&sort=createdAt,desc'
+```
+
+Admin get all links:
+
+```bash
+curl -b /tmp/fox-url-shortener-admin.cookies \
+  'http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/links?page=0&size=20&sort=createdAt,desc'
 ```
 
 Admin get user links:
 
 ```bash
 curl -b /tmp/fox-url-shortener-admin.cookies \
-  http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/users/1/links
+  'http://localhost:${DEV_APP_EXTERNAL_PORT}/api/v1/admin/users/1/links?page=0&size=20&sort=createdAt,desc'
 ```
 
 Admin disable any link:

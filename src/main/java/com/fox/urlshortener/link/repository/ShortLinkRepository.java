@@ -5,6 +5,8 @@ import com.fox.urlshortener.link.model.ShortLink;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,10 +26,10 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
             """)
     Optional<ShortLink> findActiveByCode(@Param("code") String code, @Param("now") Instant now);
 
-    List<ShortLink> findAllByUserOrderByCreatedAtDesc(User user);
+    Page<ShortLink> findAllByUser(User user, Pageable pageable);
 
-    List<ShortLink> findAllByUserAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(User user,
-            Instant now);
+    Page<ShortLink> findAllByUserAndActiveTrueAndExpiresAtAfter(User user, Instant now,
+            Pageable pageable);
 
     long countByUser(User user);
 
@@ -35,8 +37,10 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
 
     List<ShortLink> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 
-    List<ShortLink> findAllByUserIdAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(Long userId,
-            Instant now);
+    Page<ShortLink> findAllByUserId(Long userId, Pageable pageable);
+
+    Page<ShortLink> findAllByUserIdAndActiveTrueAndExpiresAtAfter(Long userId, Instant now,
+            Pageable pageable);
 
     @Modifying
     @Query("""
@@ -59,7 +63,7 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
     int addClickCount(@Param("code") String code, @Param("amount") long amount,
             @Param("now") Instant now);
 
-    @Query("""
+    @Query(value = """
             select link from ShortLink link
             join link.user owner
             where (:active is null or link.active = :active)
@@ -67,7 +71,19 @@ public interface ShortLinkRepository extends JpaRepository<ShortLink, Long> {
               and (:expired is null or
                 (:expired = true and link.expiresAt <= :now) or
                 (:expired = false and link.expiresAt > :now))
-            order by link.createdAt desc
+            """, countQuery = """
+            select count(link) from ShortLink link
+            join link.user owner
+            where (:active is null or link.active = :active)
+              and (:login is null or owner.login = :login)
+              and (:expired is null or
+                (:expired = true and link.expiresAt <= :now) or
+                (:expired = false and link.expiresAt > :now))
             """)
-    List<ShortLink> search(Boolean active, Boolean expired, String login, Instant now);
+    Page<ShortLink> search(
+            @Param("active") Boolean active,
+            @Param("expired") Boolean expired,
+            @Param("login") String login,
+            @Param("now") Instant now,
+            Pageable pageable);
 }

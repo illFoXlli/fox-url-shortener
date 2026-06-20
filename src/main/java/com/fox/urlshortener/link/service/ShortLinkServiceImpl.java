@@ -15,8 +15,9 @@ import com.fox.urlshortener.link.support.ShortCodeGenerator;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import java.util.stream.Stream;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,17 +66,23 @@ public class ShortLinkServiceImpl implements ShortLinkService {
     }
 
     @Override
-    public List<ShortLinkResponse> mine(User user, HttpServletRequest servletRequest) {
-        return responses(shortLinkRepository.findAllByUserOrderByCreatedAtDesc(user),
-                servletRequest);
+    public Page<ShortLinkResponse> mine(
+            User user,
+            HttpServletRequest servletRequest,
+            Pageable pageable) {
+        return responses(shortLinkRepository.findAllByUser(user, pageable), servletRequest);
     }
 
     @Override
-    public List<ShortLinkResponse> activeMine(User user, HttpServletRequest servletRequest) {
+    public Page<ShortLinkResponse> activeMine(
+            User user,
+            HttpServletRequest servletRequest,
+            Pageable pageable) {
         return responses(
-                shortLinkRepository.findAllByUserAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(
+                shortLinkRepository.findAllByUserAndActiveTrueAndExpiresAtAfter(
                         user,
-                        Instant.now(clock)),
+                        Instant.now(clock),
+                        pageable),
                 servletRequest);
     }
 
@@ -200,8 +207,8 @@ public class ShortLinkServiceImpl implements ShortLinkService {
         return clicks;
     }
 
-    private List<ShortLinkResponse> responses(List<ShortLink> links, HttpServletRequest request) {
-        return links.stream().map(link -> toResponse(link, request)).toList();
+    private Page<ShortLinkResponse> responses(Page<ShortLink> links, HttpServletRequest request) {
+        return links.map(link -> toResponse(link, request));
     }
 
     ShortLinkResponse toResponse(ShortLink link, HttpServletRequest request) {

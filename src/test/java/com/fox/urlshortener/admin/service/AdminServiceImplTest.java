@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 @ExtendWith(MockitoExtension.class)
 class AdminServiceImplTest {
@@ -48,13 +50,14 @@ class AdminServiceImplTest {
     @Test
     void returnsUsersWithLinkCounts() {
         User admin = TestFixtures.user(1L, "admin", UserRole.ADMIN);
-        when(userRepository.findAll()).thenReturn(List.of(admin));
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(userRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(admin)));
         when(linkRepository.countByUser(admin)).thenReturn(2L);
         when(linkRepository.countByUserAndActiveTrueAndExpiresAtAfter(
                 admin,
                 Instant.parse("2026-06-12T10:00:00Z"))).thenReturn(1L);
 
-        List<AdminUserResponse> users = service().users();
+        List<AdminUserResponse> users = service().users(pageable).getContent();
 
         assertThat(users).hasSize(1);
         assertThat(users.getFirst().activeLinksCount()).isEqualTo(1);
@@ -93,10 +96,14 @@ class AdminServiceImplTest {
     void searchesLinksWithFilters() {
         User owner = TestFixtures.user(1L, "fox", UserRole.USER);
         ShortLink link = TestFixtures.link(10L, owner);
-        when(linkRepository.search(true, false, "fox", Instant.parse("2026-06-12T10:00:00Z")))
-                .thenReturn(List.of(link));
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(linkRepository.search(true, false, "fox", Instant.parse("2026-06-12T10:00:00Z"),
+                pageable))
+                .thenReturn(new PageImpl<>(List.of(link)));
 
-        List<AdminLinkResponse> links = service().links(true, false, "fox", request);
+        List<AdminLinkResponse> links = service()
+                .links(true, false, "fox", request, pageable)
+                .getContent();
 
         assertThat(links).hasSize(1);
         assertThat(links.getFirst().shortUrl()).isEqualTo("http://localhost:3396/aB12xZ");
@@ -105,23 +112,26 @@ class AdminServiceImplTest {
     @Test
     void returnsLinksForUser() {
         User owner = TestFixtures.user(1L, "fox", UserRole.USER);
+        PageRequest pageable = PageRequest.of(0, 20);
         when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
-        when(linkRepository.findAllByUserIdOrderByCreatedAtDesc(1L))
-                .thenReturn(List.of(TestFixtures.link(10L, owner)));
+        when(linkRepository.findAllByUserId(1L, pageable))
+                .thenReturn(new PageImpl<>(List.of(TestFixtures.link(10L, owner))));
 
-        assertThat(service().userLinks(1L, request)).hasSize(1);
+        assertThat(service().userLinks(1L, request, pageable).getContent()).hasSize(1);
     }
 
     @Test
     void returnsActiveLinksForUser() {
         User owner = TestFixtures.user(1L, "fox", UserRole.USER);
+        PageRequest pageable = PageRequest.of(0, 20);
         when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
-        when(linkRepository.findAllByUserIdAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(
+        when(linkRepository.findAllByUserIdAndActiveTrueAndExpiresAtAfter(
                 1L,
-                Instant.parse("2026-06-12T10:00:00Z")))
-                .thenReturn(List.of(TestFixtures.link(10L, owner)));
+                Instant.parse("2026-06-12T10:00:00Z"),
+                pageable))
+                .thenReturn(new PageImpl<>(List.of(TestFixtures.link(10L, owner))));
 
-        assertThat(service().activeUserLinks(1L, request)).hasSize(1);
+        assertThat(service().activeUserLinks(1L, request, pageable).getContent()).hasSize(1);
     }
 
     @Test

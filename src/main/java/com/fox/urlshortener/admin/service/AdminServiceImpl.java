@@ -13,7 +13,8 @@ import com.fox.urlshortener.link.repository.ShortLinkRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,11 +44,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<AdminUserResponse> users() {
-        return userRepository.findAll()
-                .stream()
-                .map(this::toUserResponse)
-                .toList();
+    public Page<AdminUserResponse> users(Pageable pageable) {
+        return userRepository.findAll(pageable).map(this::toUserResponse);
     }
 
     @Override
@@ -71,29 +69,40 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<AdminLinkResponse> links(
+    public Page<AdminLinkResponse> links(
             Boolean active,
             Boolean expired,
             String login,
-            HttpServletRequest request) {
-        return responses(shortLinkRepository.search(active, expired, login, Instant.now(clock)),
-                request);
+            HttpServletRequest request,
+            Pageable pageable) {
+        return responses(shortLinkRepository.search(
+                active,
+                expired,
+                login,
+                Instant.now(clock),
+                pageable), request);
     }
 
     @Override
-    public List<AdminLinkResponse> userLinks(Long userId, HttpServletRequest request) {
+    public Page<AdminLinkResponse> userLinks(
+            Long userId,
+            HttpServletRequest request,
+            Pageable pageable) {
         findUser(userId);
-        return responses(shortLinkRepository.findAllByUserIdOrderByCreatedAtDesc(userId), request);
+        return responses(shortLinkRepository.findAllByUserId(userId, pageable), request);
     }
 
     @Override
-    public List<AdminLinkResponse> activeUserLinks(Long userId, HttpServletRequest request) {
+    public Page<AdminLinkResponse> activeUserLinks(
+            Long userId,
+            HttpServletRequest request,
+            Pageable pageable) {
         findUser(userId);
         return responses(
-                shortLinkRepository
-                        .findAllByUserIdAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(
-                                userId,
-                                Instant.now(clock)),
+                shortLinkRepository.findAllByUserIdAndActiveTrueAndExpiresAtAfter(
+                        userId,
+                        Instant.now(clock),
+                        pageable),
                 request);
     }
 
@@ -143,8 +152,8 @@ public class AdminServiceImpl implements AdminService {
                         Instant.now(clock)));
     }
 
-    private List<AdminLinkResponse> responses(List<ShortLink> links, HttpServletRequest request) {
-        return links.stream().map(link -> toLinkResponse(link, request)).toList();
+    private Page<AdminLinkResponse> responses(Page<ShortLink> links, HttpServletRequest request) {
+        return links.map(link -> toLinkResponse(link, request));
     }
 
     private AdminLinkResponse toLinkResponse(ShortLink link, HttpServletRequest request) {

@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -189,21 +191,24 @@ class ShortLinkServiceImplTest {
     @Test
     void listsOnlyActiveOwnedLinks() {
         User owner = TestFixtures.user(1L, "owner", UserRole.USER);
-        when(repository.findAllByUserAndActiveTrueAndExpiresAtAfterOrderByCreatedAtDesc(
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(repository.findAllByUserAndActiveTrueAndExpiresAtAfter(
                 owner,
-                Instant.parse("2026-06-12T10:00:00Z")))
-                .thenReturn(List.of(TestFixtures.link(10L, owner)));
+                Instant.parse("2026-06-12T10:00:00Z"),
+                pageable))
+                .thenReturn(new PageImpl<>(List.of(TestFixtures.link(10L, owner))));
 
-        assertThat(service().activeMine(owner, request)).hasSize(1);
+        assertThat(service().activeMine(owner, request, pageable).getContent()).hasSize(1);
     }
 
     @Test
     void listsAllOwnedLinks() {
         User owner = TestFixtures.user(1L, "owner", UserRole.USER);
-        when(repository.findAllByUserOrderByCreatedAtDesc(owner))
-                .thenReturn(List.of(TestFixtures.link(10L, owner)));
+        PageRequest pageable = PageRequest.of(0, 20);
+        when(repository.findAllByUser(owner, pageable))
+                .thenReturn(new PageImpl<>(List.of(TestFixtures.link(10L, owner))));
 
-        assertThat(service().mine(owner, request)).hasSize(1);
+        assertThat(service().mine(owner, request, pageable).getContent()).hasSize(1);
     }
 
     @Test

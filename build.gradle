@@ -114,13 +114,8 @@ static def coverageExcludes() {
     return [
         '**/AppLauncher.class',
         '**/config/**',
-        '**/common/**',
-        '**/security/**',
-        '**/*Controller.class',
         '**/*Request.class',
         '**/*Response.class',
-        '**/ApiError.class',
-        '**/ValidationMessages.class',
         '**/User.class',
         '**/RefreshToken.class',
         '**/ShortLink.class',

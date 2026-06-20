@@ -34,13 +34,15 @@ class AdminApiIntegrationTest extends IntegrationTestBase {
         mockMvc.perform(get("/api/v1/admin/users")
                 .cookie(adminCookies))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].login").isNotEmpty());
+                .andExpect(jsonPath("$.content[0].login").isNotEmpty())
+                .andExpect(jsonPath("$.size").value(20));
 
         mockMvc.perform(get("/api/v1/admin/links")
                 .cookie(adminCookies)
                 .param("login", "fox_admin_api"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].userLogin").value("fox_admin_api"));
+                .andExpect(jsonPath("$.content[0].userLogin").value("fox_admin_api"))
+                .andExpect(jsonPath("$.totalElements").value(1));
 
         mockMvc.perform(patch("/api/v1/admin/links/{id}/status", created.get("id").asLong())
                 .cookie(adminCookies)
