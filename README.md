@@ -679,6 +679,11 @@ Run formatting and individual checks:
 ./gradlew test jacocoTestReport jacocoTestCoverageVerification
 ```
 
+JaCoCo coverage verification requires at least 80% instruction coverage.
+Controllers, `common`, and security classes are included in coverage; only
+application bootstrap, configuration, DTO request/response records, and JPA
+model classes remain excluded.
+
 Install pre-commit hook:
 
 ```bash
