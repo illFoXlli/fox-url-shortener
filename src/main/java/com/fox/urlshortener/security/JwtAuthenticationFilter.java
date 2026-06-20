@@ -4,11 +4,13 @@ import com.fox.urlshortener.auth.security.JwtTokenService;
 import com.fox.urlshortener.auth.model.User;
 import com.fox.urlshortener.auth.repository.UserRepository;
 import com.fox.urlshortener.config.AppProperties;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -17,6 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final String INVALID_TOKEN_RESPONSE = "{\"message\":\"Invalid or expired token\"}";
 
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
@@ -48,10 +52,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .filter(user -> jwtTokenService.valid(token, user))
                         .ifPresent(user -> authenticate(request, user));
             }
-        } catch (RuntimeException ex) {
+        } catch (JwtException ex) {
             SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(INVALID_TOKEN_RESPONSE);
+            return;
         }
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        if (!"POST".equals(request.getMethod())) {
+            return false;
+        }
+        String path = request.getRequestURI();
+        return "/api/v1/auth/register".equals(path)
+                || "/api/v1/auth/login".equals(path)
+                || "/api/v1/auth/refresh".equals(path)
+                || "/api/v1/auth/logout".equals(path);
     }
 
     private String token(HttpServletRequest request) {
