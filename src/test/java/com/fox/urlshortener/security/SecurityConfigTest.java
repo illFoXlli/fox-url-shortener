@@ -13,6 +13,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,6 +64,32 @@ class SecurityConfigTest {
         assertThat(configuration.getAllowedHeaders())
                 .containsExactly("Content-Type", "Authorization");
         assertThat(configuration.getAllowCredentials()).isTrue();
+    }
+
+    @Test
+    void authenticationEntryPointReturnsUnauthorizedJson() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        securityConfig.authenticationEntryPoint()
+                .commence(new MockHttpServletRequest("GET", "/api/v1/links"), response,
+                        new BadCredentialsException("missing"));
+
+        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContentAsString()).isEqualTo("{\"message\":\"Unauthorized\"}");
+    }
+
+    @Test
+    void accessDeniedHandlerReturnsForbiddenJson() throws Exception {
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        securityConfig.accessDeniedHandler()
+                .handle(new MockHttpServletRequest("GET", "/api/v1/admin/users"), response,
+                        new AccessDeniedException("denied"));
+
+        assertThat(response.getStatus()).isEqualTo(403);
+        assertThat(response.getContentType()).isEqualTo("application/json");
+        assertThat(response.getContentAsString()).isEqualTo("{\"message\":\"Access denied\"}");
     }
 
     @Test
