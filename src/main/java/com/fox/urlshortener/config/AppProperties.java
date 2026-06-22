@@ -1,6 +1,5 @@
 package com.fox.urlshortener.config;
 
-import com.fox.urlshortener.link.model.ShortLink;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;

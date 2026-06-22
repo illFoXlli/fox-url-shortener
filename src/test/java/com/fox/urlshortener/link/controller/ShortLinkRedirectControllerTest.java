@@ -64,7 +64,9 @@ class ShortLinkRedirectControllerTest {
         when(shortLinkService.redirect("aB12xZ"))
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY));
 
-        assertThatThrownBy(() -> controller().redirect("aB12xZ"))
+        ShortLinkRedirectController controller = controller();
+
+        assertThatThrownBy(() -> controller.redirect("aB12xZ"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("502");
     }

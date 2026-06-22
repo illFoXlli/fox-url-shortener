@@ -117,6 +117,8 @@ class GlobalExceptionHandlerTest {
 
     @SuppressWarnings("unused")
     private void dummy(RegisterCommand command) {
+        // Intentionally empty: this method exists only to create MethodParameter
+        // metadata for tests.
     }
 
     private record RegisterCommand(String login) {

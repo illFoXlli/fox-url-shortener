@@ -160,7 +160,7 @@ public class AdminServiceImpl implements AdminService {
         return new AdminLinkResponse(
                 link.getId(),
                 link.getCode(),
-                baseUrlResolver.resolve(request) + "/" + link.getCode(),
+                baseUrlResolver.resolve() + "/" + link.getCode(),
                 link.getOriginalUrl(),
                 link.isActive(),
                 link.getClickCount(),

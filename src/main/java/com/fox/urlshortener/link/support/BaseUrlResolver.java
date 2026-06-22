@@ -1,7 +1,6 @@
 package com.fox.urlshortener.link.support;
 
 import com.fox.urlshortener.config.AppProperties;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +12,7 @@ public class BaseUrlResolver {
         this.appProperties = appProperties;
     }
 
-    public String resolve(HttpServletRequest request) {
+    public String resolve() {
         return trimSlash(appProperties.shortUrlBaseUrl());
     }
 
